@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated.index'
+import { Route as AuthenticatedApplicationsNewRouteImport } from './routes/_authenticated.applications.new'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -27,27 +28,41 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedApplicationsNewRoute =
+  AuthenticatedApplicationsNewRouteImport.update({
+    id: '/applications/new',
+    path: '/applications/new',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
+  '/applications/new': typeof AuthenticatedApplicationsNewRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/': typeof AuthenticatedIndexRoute
+  '/applications/new': typeof AuthenticatedApplicationsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/applications/new': typeof AuthenticatedApplicationsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth'
+  fullPaths: '/' | '/auth' | '/applications/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/auth' | '/'
-  id: '__root__' | '/_authenticated' | '/auth' | '/_authenticated/'
+  to: '/auth' | '/' | '/applications/new'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/'
+    | '/_authenticated/applications/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -78,15 +93,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/applications/new': {
+      id: '/_authenticated/applications/new'
+      path: '/applications/new'
+      fullPath: '/applications/new'
+      preLoaderRoute: typeof AuthenticatedApplicationsNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedApplicationsNewRoute: typeof AuthenticatedApplicationsNewRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedApplicationsNewRoute: AuthenticatedApplicationsNewRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
