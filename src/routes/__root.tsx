@@ -57,8 +57,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "CreditCrew AI — MSME Underwriting Workspace" },
       { name: "twitter:description", content: "Multi-agent AI underwriting for credit-invisible MSMEs. Assess GST, UPI, Account Aggregator and EPFO data with explainable Financial Health Cards." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/ea61b4fd-79b7-4d56-9ff1-b03ae34f8bfb" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/ea61b4fd-79b7-4d56-9ff1-b03ae34f8bfb" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/HF78MCOFSaM3GbWRrP7R7CYwD5G2/social-images/social-1783549801341-CCAI_Simple_Social_Preview_Image.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/HF78MCOFSaM3GbWRrP7R7CYwD5G2/social-images/social-1783549801341-CCAI_Simple_Social_Preview_Image.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
