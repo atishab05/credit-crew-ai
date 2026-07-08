@@ -14,7 +14,198 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agent_results: {
+        Row: {
+          agent_name: string
+          application_id: string
+          completed_at: string | null
+          id: string
+          output: Json | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          agent_name: string
+          application_id: string
+          completed_at?: string | null
+          id?: string
+          output?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          agent_name?: string
+          application_id?: string
+          completed_at?: string | null
+          id?: string
+          output?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_results_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      applications: {
+        Row: {
+          applicant_name: string
+          borrowing_capacity: number | null
+          confidence_level: string | null
+          created_at: string
+          decided_at: string | null
+          decision: string | null
+          decision_notes: string | null
+          gstin: string
+          id: string
+          loan_officer_id: string
+          overall_health_score: number | null
+          pan: string
+          recommended_loan_product: string | null
+          risk_rating: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          applicant_name: string
+          borrowing_capacity?: number | null
+          confidence_level?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decision?: string | null
+          decision_notes?: string | null
+          gstin: string
+          id?: string
+          loan_officer_id: string
+          overall_health_score?: number | null
+          pan: string
+          recommended_loan_product?: string | null
+          risk_rating?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          applicant_name?: string
+          borrowing_capacity?: number | null
+          confidence_level?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decision?: string | null
+          decision_notes?: string | null
+          gstin?: string
+          id?: string
+          loan_officer_id?: string
+          overall_health_score?: number | null
+          pan?: string
+          recommended_loan_product?: string | null
+          risk_rating?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          application_id: string
+          created_at: string
+          details: Json | null
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          application_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          application_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_connections: {
+        Row: {
+          application_id: string
+          connected_at: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          source: string
+          status: string
+        }
+        Insert: {
+          application_id: string
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          source: string
+          status?: string
+        }
+        Update: {
+          application_id?: string
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          source?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_connections_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          branch: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          role: string
+        }
+        Insert: {
+          branch?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          role?: string
+        }
+        Update: {
+          branch?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          role?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
