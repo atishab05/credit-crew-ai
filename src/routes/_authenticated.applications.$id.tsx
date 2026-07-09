@@ -168,6 +168,7 @@ function AppDetail() {
                   );
                 })}
               </div>
+              <AgentTimeline agents={agents} running={running} />
             </CardContent>
           </Card>
         </TabsContent>
