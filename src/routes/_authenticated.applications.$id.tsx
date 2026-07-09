@@ -88,7 +88,7 @@ function AppDetail() {
         </div>
       </div>
 
-      <Tabs defaultValue={defaultTab} className="space-y-4">
+      <Tabs value={tab ?? defaultTab} onValueChange={setTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="sources">1. Data sources</TabsTrigger>
           <TabsTrigger value="run">2. Agent run</TabsTrigger>
