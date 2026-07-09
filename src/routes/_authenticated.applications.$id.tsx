@@ -52,6 +52,7 @@ function AppDetail() {
   });
 
   const [notes, setNotes] = useState("");
+  const [tab, setTab] = useState<string | undefined>(undefined);
   const decideMut = useMutation({
     mutationFn: (decision: "approved" | "rejected" | "documents_requested") => decide({ data: { application_id: id, decision, notes } }),
     onSuccess: () => { toast.success("Decision recorded"); qc.invalidateQueries({ queryKey: ["application", id] }); qc.invalidateQueries({ queryKey: ["applications"] }); },
