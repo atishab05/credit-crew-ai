@@ -253,6 +253,42 @@ function AgentStatusIcon({ status }: { status: string }) {
   return <div className="h-2 w-2 rounded-full bg-muted-foreground/30 mt-1" />;
 }
 
+function AgentTimeline({ agents, running }: { agents: any[]; running: boolean }) {
+  const events = AGENTS.map((a) => {
+    const r = agents.find((x: any) => x.agent_name === a.key);
+    return { key: a.key, label: a.label, status: r?.status ?? "pending", started_at: r?.started_at, completed_at: r?.completed_at };
+  }).filter((e) => e.status !== "pending" || running);
+
+  if (events.length === 0) {
+    return <div className="mt-6 text-xs text-muted-foreground">Timeline will appear once the run starts.</div>;
+  }
+
+  const fmt = (t?: string) => (t ? new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "—");
+
+  return (
+    <div className="mt-6">
+      <div className="text-xs uppercase tracking-wide text-muted-foreground mb-3">Live timeline</div>
+      <ol className="relative border-l pl-6 space-y-3">
+        {events.map((e) => (
+          <li key={e.key} className="text-sm">
+            <div className={`absolute -left-[7px] mt-1 h-3 w-3 rounded-full ring-2 ring-background ${e.status === "completed" ? "bg-success" : e.status === "running" ? "bg-accent animate-pulse" : e.status === "failed" ? "bg-destructive" : "bg-muted-foreground/30"}`} />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <AgentStatusIcon status={e.status} />
+                <span className="font-medium">{e.label}</span>
+                <Badge variant="outline" className="capitalize text-[10px]">{e.status}</Badge>
+              </div>
+              <div className="text-xs text-muted-foreground tabular-nums">
+                {e.status === "running" ? `started ${fmt(e.started_at)}` : e.completed_at ? `${fmt(e.started_at)} → ${fmt(e.completed_at)}` : fmt(e.started_at)}
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 function HealthCard({ recommendation, explanation, agents }: { recommendation: any; explanation: any; agents: any[] }) {
   const score = recommendation.overall_health_score as number;
   const scoreColor = score >= 78 ? "text-success" : score >= 60 ? "text-accent" : score >= 45 ? "text-warning-foreground" : "text-destructive";
