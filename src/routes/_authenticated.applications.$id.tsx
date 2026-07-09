@@ -153,6 +153,7 @@ function AppDetail() {
               </Button>
             </CardHeader>
             <CardContent>
+              {(running || runMut.isPending) && <RunProgress agents={agents} />}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 {AGENTS.map((a) => {
                   const r = agents.find((x: any) => x.agent_name === a.key);
@@ -251,6 +252,23 @@ function AgentStatusIcon({ status }: { status: string }) {
   if (status === "completed") return <CheckCircle2 className="h-4 w-4 text-success" />;
   if (status === "failed") return <XCircle className="h-4 w-4 text-destructive" />;
   return <div className="h-2 w-2 rounded-full bg-muted-foreground/30 mt-1" />;
+}
+
+function RunProgress({ agents }: { agents: any[] }) {
+  const completed = agents.filter((a) => a.status === "completed").length;
+  const total = AGENTS.length;
+  const pct = Math.round((completed / total) * 100);
+
+  return (
+    <div className="mb-6 rounded-lg border bg-muted/40 p-4 space-y-3">
+      <div className="flex items-center justify-between text-sm">
+        <span className="font-medium inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin text-accent" /> Assessment running…</span>
+        <span className="text-muted-foreground tabular-nums">{completed}/{total} agents complete</span>
+      </div>
+      <Progress value={pct} className="h-2" />
+      <div className="text-xs text-muted-foreground">{pct}% complete — results refresh automatically.</div>
+    </div>
+  );
 }
 
 function AgentTimeline({ agents, running }: { agents: any[]; running: boolean }) {
