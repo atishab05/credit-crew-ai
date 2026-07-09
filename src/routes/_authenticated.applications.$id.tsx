@@ -153,6 +153,7 @@ function AppDetail() {
               </Button>
             </CardHeader>
             <CardContent>
+              {(running || runMut.isPending) && <RunProgress agents={agents} />}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 {AGENTS.map((a) => {
                   const r = agents.find((x: any) => x.agent_name === a.key);
