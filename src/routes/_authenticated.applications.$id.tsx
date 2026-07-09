@@ -46,7 +46,7 @@ function AppDetail() {
   });
 
   const runMut = useMutation({
-    mutationFn: () => run({ data: { application_id: id } }),
+    mutationFn: () => { setTab("run"); return run({ data: { application_id: id } }); },
     onSuccess: () => { toast.success("Assessment complete"); qc.invalidateQueries({ queryKey: ["application", id] }); qc.invalidateQueries({ queryKey: ["applications"] }); },
     onError: (e: any) => toast.error(e?.message ?? "Run failed"),
   });
