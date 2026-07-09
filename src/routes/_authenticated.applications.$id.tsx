@@ -46,12 +46,13 @@ function AppDetail() {
   });
 
   const runMut = useMutation({
-    mutationFn: () => run({ data: { application_id: id } }),
+    mutationFn: () => { setTab("run"); return run({ data: { application_id: id } }); },
     onSuccess: () => { toast.success("Assessment complete"); qc.invalidateQueries({ queryKey: ["application", id] }); qc.invalidateQueries({ queryKey: ["applications"] }); },
     onError: (e: any) => toast.error(e?.message ?? "Run failed"),
   });
 
   const [notes, setNotes] = useState("");
+  const [tab, setTab] = useState<string | undefined>(undefined);
   const decideMut = useMutation({
     mutationFn: (decision: "approved" | "rejected" | "documents_requested") => decide({ data: { application_id: id, decision, notes } }),
     onSuccess: () => { toast.success("Decision recorded"); qc.invalidateQueries({ queryKey: ["application", id] }); qc.invalidateQueries({ queryKey: ["applications"] }); },
@@ -87,7 +88,7 @@ function AppDetail() {
         </div>
       </div>
 
-      <Tabs defaultValue={defaultTab} className="space-y-4">
+      <Tabs value={tab ?? defaultTab} onValueChange={setTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="sources">1. Data sources</TabsTrigger>
           <TabsTrigger value="run">2. Agent run</TabsTrigger>
