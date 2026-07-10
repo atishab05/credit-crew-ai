@@ -18,7 +18,7 @@ function AuthenticatedShell() {
   const navigate = useNavigate();
 
   const nav = [
-    { to: "/", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/applications/new", label: "New Assessment", icon: FilePlus2 },
     { to: "/history", label: "History", icon: History },
   ] as const;

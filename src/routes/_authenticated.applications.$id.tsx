@@ -74,7 +74,7 @@ function AppDetail() {
   return (
     <div className="p-6 lg:p-10 space-y-6 max-w-7xl">
       <div>
-        <Link to="/" className="text-sm text-muted-foreground inline-flex items-center gap-1"><ArrowLeft className="h-3 w-3" /> Dashboard</Link>
+        <Link to="/dashboard" className="text-sm text-muted-foreground inline-flex items-center gap-1"><ArrowLeft className="h-3 w-3" /> Dashboard</Link>
         <div className="flex flex-wrap items-start justify-between gap-4 mt-2">
           <div>
             <h1 className="text-3xl font-semibold">{app.applicant_name}</h1>
