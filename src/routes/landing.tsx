@@ -2,7 +2,23 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Zap, BarChart3, FileText, Lock, ArrowRight } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
+import {
+  ShieldCheck,
+  Zap,
+  BarChart3,
+  FileText,
+  Lock,
+  ArrowRight,
+  Menu,
+} from "lucide-react";
 
 export const Route = createFileRoute("/landing")({
   head: () => ({
@@ -22,25 +38,78 @@ export const Route = createFileRoute("/landing")({
   component: LandingPage,
 });
 
+const navLinks = [
+  { label: "Features", href: "#features" },
+  { label: "How it works", href: "#how-it-works" },
+  { label: "Get started", href: "#get-started" },
+];
+
 function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex max-w-md items-center justify-between px-4 py-3 md:max-w-5xl">
-          <div className="flex items-center gap-2">
+          <a href="#hero" className="flex items-center gap-2">
             <div className="grid h-8 w-8 place-items-center rounded-md bg-accent text-accent-foreground">
               <ShieldCheck className="h-4 w-4" />
             </div>
             <span className="font-semibold">CreditCrew AI</span>
+          </a>
+
+          <nav className="hidden items-center gap-6 md:flex">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {link.label}
+              </a>
+            ))}
+            <Button asChild variant="outline" size="sm">
+              <Link to="/auth">Sign in</Link>
+            </Button>
+          </nav>
+
+          <div className="flex items-center gap-2 md:hidden">
+            <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
+              <Link to="/auth">Sign in</Link>
+            </Button>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Open menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[260px]">
+                <SheetHeader>
+                  <SheetTitle className="text-left">Menu</SheetTitle>
+                </SheetHeader>
+                <nav className="mt-6 flex flex-col gap-2">
+                  {navLinks.map((link) => (
+                    <SheetClose asChild key={link.href}>
+                      <a
+                        href={link.href}
+                        className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                      >
+                        {link.label}
+                      </a>
+                    </SheetClose>
+                  ))}
+                  <SheetClose asChild>
+                    <Button asChild className="mt-4 w-full">
+                      <Link to="/auth">Sign in</Link>
+                    </Button>
+                  </SheetClose>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/auth">Sign in</Link>
-          </Button>
         </div>
       </header>
 
       <main>
-        <section className="bg-hero px-4 pt-12 pb-16 text-primary-foreground md:pt-20 md:pb-24">
+        <section id="hero" className="bg-hero px-4 pt-12 pb-16 text-primary-foreground md:pt-20 md:pb-24">
           <div className="mx-auto max-w-md md:max-w-3xl">
             <Badge className="mb-4 border-transparent bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/15">
               Hackathon MVP
@@ -69,7 +138,7 @@ function LandingPage() {
           </div>
         </section>
 
-        <section className="px-4 py-12 md:py-16">
+        <section id="features" className="px-4 py-12 md:py-16">
           <div className="mx-auto max-w-md md:max-w-5xl">
             <h2 className="text-center text-2xl font-semibold">Built for mobile underwriting</h2>
             <p className="mx-auto mt-2 max-w-md text-center text-sm text-muted-foreground">
@@ -91,7 +160,7 @@ function LandingPage() {
           </div>
         </section>
 
-        <section className="bg-muted px-4 py-12 md:py-16">
+        <section id="how-it-works" className="bg-muted px-4 py-12 md:py-16">
           <div className="mx-auto max-w-md md:max-w-3xl">
             <h2 className="text-2xl font-semibold">How it works</h2>
             <div className="mt-6 space-y-4">
@@ -107,7 +176,7 @@ function LandingPage() {
           </div>
         </section>
 
-        <section className="px-4 py-12 text-center md:py-16">
+        <section id="get-started" className="px-4 py-12 text-center md:py-16">
           <div className="mx-auto max-w-md">
             <h2 className="text-2xl font-semibold">Ready to underwrite smarter?</h2>
             <p className="mt-2 text-sm text-muted-foreground">Sign in and run your first multi-agent assessment.</p>
