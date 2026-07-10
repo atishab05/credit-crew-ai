@@ -42,7 +42,7 @@ function AuthenticatedShell() {
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
           {nav.map((n) => {
-            const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
+            const active = pathname === n.to || pathname.startsWith(n.to + "/");
             return (
               <Link
                 key={n.to}
