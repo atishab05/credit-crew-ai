@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, FilePlus2, TrendingUp, CheckCircle2, Clock } from "lucide-react";
 import { formatCurrency, statusBadge, riskBadge } from "@/components/creditcrew/format";
 
-export const Route = createFileRoute("/_authenticated/")({
+export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
 });
 

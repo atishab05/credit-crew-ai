@@ -20,7 +20,7 @@ import {
   Menu,
 } from "lucide-react";
 
-export const Route = createFileRoute("/landing")({
+export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "CreditCrew AI — MSME Underwriting Workspace" },

@@ -18,7 +18,7 @@ function AuthenticatedShell() {
   const navigate = useNavigate();
 
   const nav = [
-    { to: "/", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/applications/new", label: "New Assessment", icon: FilePlus2 },
     { to: "/history", label: "History", icon: History },
   ] as const;
@@ -42,7 +42,7 @@ function AuthenticatedShell() {
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
           {nav.map((n) => {
-            const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
+            const active = pathname === n.to || pathname.startsWith(n.to + "/");
             return (
               <Link
                 key={n.to}

@@ -36,7 +36,7 @@ function NewApplication() {
 
   return (
     <div className="p-6 lg:p-10 max-w-2xl">
-      <Link to="/" className="text-sm text-muted-foreground inline-flex items-center gap-1 mb-4"><ArrowLeft className="h-3 w-3" /> Back to dashboard</Link>
+      <Link to="/dashboard" className="text-sm text-muted-foreground inline-flex items-center gap-1 mb-4"><ArrowLeft className="h-3 w-3" /> Back to dashboard</Link>
       <Card>
         <CardHeader>
           <CardTitle>New MSME assessment</CardTitle>
