@@ -214,6 +214,32 @@ function AppDetail() {
           </Card>
         </TabsContent>
 
+        {/* DOCUMENTS */}
+        <TabsContent value="documents" className="space-y-4">
+          <DocumentsPanel applicationId={id} />
+          {app.consent_given && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-accent" /> Consent &amp; retention</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-3 sm:grid-cols-3 text-sm">
+                <div>
+                  <div className="text-xs text-muted-foreground">Consent reference</div>
+                  <div className="font-mono break-all">{app.consent_reference ?? "—"}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Consent recorded</div>
+                  <div>{app.consent_at ? new Date(app.consent_at).toLocaleString() : "—"}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Retention until</div>
+                  <div>{app.retention_until ? new Date(app.retention_until).toLocaleDateString() : "—"}</div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
         {/* AUDIT */}
         <TabsContent value="audit" className="space-y-4">
           <Card>
