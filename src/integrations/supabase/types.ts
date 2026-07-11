@@ -57,6 +57,9 @@ export type Database = {
           applicant_name: string
           borrowing_capacity: number | null
           confidence_level: string | null
+          consent_at: string | null
+          consent_given: boolean
+          consent_reference: string | null
           created_at: string
           decided_at: string | null
           decision: string | null
@@ -66,7 +69,9 @@ export type Database = {
           loan_officer_id: string
           overall_health_score: number | null
           pan: string
+          pii_erased_at: string | null
           recommended_loan_product: string | null
+          retention_until: string | null
           risk_rating: string | null
           status: string
           updated_at: string
@@ -75,6 +80,9 @@ export type Database = {
           applicant_name: string
           borrowing_capacity?: number | null
           confidence_level?: string | null
+          consent_at?: string | null
+          consent_given?: boolean
+          consent_reference?: string | null
           created_at?: string
           decided_at?: string | null
           decision?: string | null
@@ -84,7 +92,9 @@ export type Database = {
           loan_officer_id: string
           overall_health_score?: number | null
           pan: string
+          pii_erased_at?: string | null
           recommended_loan_product?: string | null
+          retention_until?: string | null
           risk_rating?: string | null
           status?: string
           updated_at?: string
@@ -93,6 +103,9 @@ export type Database = {
           applicant_name?: string
           borrowing_capacity?: number | null
           confidence_level?: string | null
+          consent_at?: string | null
+          consent_given?: boolean
+          consent_reference?: string | null
           created_at?: string
           decided_at?: string | null
           decision?: string | null
@@ -102,7 +115,9 @@ export type Database = {
           loan_officer_id?: string
           overall_health_score?: number | null
           pan?: string
+          pii_erased_at?: string | null
           recommended_loan_product?: string | null
+          retention_until?: string | null
           risk_rating?: string | null
           status?: string
           updated_at?: string
@@ -175,6 +190,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "data_connections_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          application_id: string
+          content_type: string | null
+          created_at: string
+          filename: string
+          id: string
+          s3_key: string
+          size_bytes: number | null
+          uploaded_by: string
+        }
+        Insert: {
+          application_id: string
+          content_type?: string | null
+          created_at?: string
+          filename: string
+          id?: string
+          s3_key: string
+          size_bytes?: number | null
+          uploaded_by: string
+        }
+        Update: {
+          application_id?: string
+          content_type?: string | null
+          created_at?: string
+          filename?: string
+          id?: string
+          s3_key?: string
+          size_bytes?: number | null
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_application_id_fkey"
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
