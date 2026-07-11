@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, FilePlus2, TrendingUp, CheckCircle2, Clock } from "lucide-react";
 import { formatCurrency, statusBadge, riskBadge } from "@/components/creditcrew/format";
+import { maskPan, maskGstin } from "@/lib/pii";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -57,7 +58,7 @@ function Dashboard() {
                 <Link key={a.id} to="/applications/$id" params={{ id: a.id }} className="grid grid-cols-12 items-center gap-3 p-4 hover:bg-muted/40 transition-colors">
                   <div className="col-span-4">
                     <div className="font-medium">{a.applicant_name}</div>
-                    <div className="text-xs text-muted-foreground font-mono">{a.pan} · {a.gstin}</div>
+                    <div className="text-xs text-muted-foreground font-mono" title="PAN and GSTIN are masked in list views (DPDP)">{maskPan(a.pan)} · {maskGstin(a.gstin)}</div>
                   </div>
                   <div className="col-span-2 text-sm">{statusBadge(a.status)}</div>
                   <div className="col-span-2 text-sm">{a.risk_rating ? riskBadge(a.risk_rating) : <span className="text-muted-foreground">—</span>}</div>

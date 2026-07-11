@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { formatCurrency, statusBadge, riskBadge } from "@/components/creditcrew/format";
+import { DocumentsPanel } from "@/components/creditcrew/DocumentsPanel";
 import { toast } from "sonner";
 import { CheckCircle2, XCircle, Loader2, Zap, ArrowLeft, ThumbsUp, ThumbsDown, FileQuestion, Sparkles, ShieldCheck } from "lucide-react";
 import { useState } from "react";
@@ -94,6 +95,7 @@ function AppDetail() {
           <TabsTrigger value="run">2. Agent run</TabsTrigger>
           <TabsTrigger value="health" disabled={!recommendation}>3. Health card</TabsTrigger>
           <TabsTrigger value="decision" disabled={!recommendation}>4. Decision</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="audit">Audit trail</TabsTrigger>
         </TabsList>
 
@@ -210,6 +212,32 @@ function AppDetail() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* DOCUMENTS */}
+        <TabsContent value="documents" className="space-y-4">
+          <DocumentsPanel applicationId={id} />
+          {app.consent_given && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-accent" /> Consent &amp; retention</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-3 sm:grid-cols-3 text-sm">
+                <div>
+                  <div className="text-xs text-muted-foreground">Consent reference</div>
+                  <div className="font-mono break-all">{app.consent_reference ?? "—"}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Consent recorded</div>
+                  <div>{app.consent_at ? new Date(app.consent_at).toLocaleString() : "—"}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Retention until</div>
+                  <div>{app.retention_until ? new Date(app.retention_until).toLocaleDateString() : "—"}</div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* AUDIT */}
