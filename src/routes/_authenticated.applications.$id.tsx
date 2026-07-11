@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { formatCurrency, statusBadge, riskBadge } from "@/components/creditcrew/format";
+import { DocumentsPanel } from "@/components/creditcrew/DocumentsPanel";
 import { toast } from "sonner";
 import { CheckCircle2, XCircle, Loader2, Zap, ArrowLeft, ThumbsUp, ThumbsDown, FileQuestion, Sparkles, ShieldCheck } from "lucide-react";
 import { useState } from "react";
@@ -94,6 +95,7 @@ function AppDetail() {
           <TabsTrigger value="run">2. Agent run</TabsTrigger>
           <TabsTrigger value="health" disabled={!recommendation}>3. Health card</TabsTrigger>
           <TabsTrigger value="decision" disabled={!recommendation}>4. Decision</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="audit">Audit trail</TabsTrigger>
         </TabsList>
 

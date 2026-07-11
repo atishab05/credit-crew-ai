@@ -9,6 +9,9 @@ const CreateInput = z.object({
   applicant_name: z.string().min(2).max(120),
   pan: z.string().regex(PAN, "Invalid PAN format (e.g. ABCDE1234F)"),
   gstin: z.string().regex(GSTIN, "Invalid GSTIN format"),
+  consent_given: z.literal(true, { errorMap: () => ({ message: "Borrower consent is required (DPDP)" }) }),
+  consent_reference: z.string().min(3).max(120),
+  retention_days: z.number().int().min(30).max(3650).default(365),
 });
 
 export const createApplication = createServerFn({ method: "POST" })
@@ -16,6 +19,8 @@ export const createApplication = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => CreateInput.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const now = new Date();
+    const retention_until = new Date(now.getTime() + data.retention_days * 24 * 60 * 60 * 1000);
     const { data: app, error } = await (supabase as any)
       .from("applications")
       .insert({
@@ -23,6 +28,10 @@ export const createApplication = createServerFn({ method: "POST" })
         applicant_name: data.applicant_name,
         pan: data.pan.toUpperCase(),
         gstin: data.gstin.toUpperCase(),
+        consent_given: true,
+        consent_reference: data.consent_reference,
+        consent_at: now.toISOString(),
+        retention_until: retention_until.toISOString(),
       })
       .select("id")
       .single();
@@ -36,7 +45,11 @@ export const createApplication = createServerFn({ method: "POST" })
       application_id: app.id,
       action: "application_created",
       actor_id: userId,
-      details: { applicant_name: data.applicant_name },
+      details: {
+        applicant_name: data.applicant_name,
+        consent_reference: data.consent_reference,
+        retention_days: data.retention_days,
+      },
     });
     return { id: app.id as string };
   });
