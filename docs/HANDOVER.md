@@ -37,8 +37,8 @@ This document is the entry point for the IDBI engineering & infosec teams.
 
 ## Contact
 
-- Engineering: `creditcrew-eng@your-org.example`
-- Security: `creditcrew-security@your-org.example`
+- Engineering: `atishab05@gmail.com`
+- Security: `atishab05@gmail.com`
 
 ## Sharing
 
