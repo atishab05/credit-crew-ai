@@ -76,7 +76,7 @@ function AuthPage() {
           </ul>
         </div>
         <div className="text-xs text-primary-foreground/60">
-          SBI × IDBI Hackathon proof of concept — synthetic sandbox data.
+          IDBI Innovate 2026 Hackathon proof of concept — synthetic sandbox data.
         </div>
       </div>
 
