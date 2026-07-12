@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getApplication, connectSource, runAssessment, submitDecision } from "@/lib/creditcrew.functions";
+import { getDataSourceSettings, type DataSourceSetting } from "@/lib/data-source-settings.functions";
 import { AGENTS, DATA_SOURCES, type AgentName, type DataSource } from "@/lib/creditcrew";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,11 @@ function AppDetail() {
   const connect = useServerFn(connectSource);
   const run = useServerFn(runAssessment);
   const decide = useServerFn(submitDecision);
+  const fetchSettings = useServerFn(getDataSourceSettings);
+  const settingsQuery = useQuery({
+    queryKey: ["data-source-settings"],
+    queryFn: () => fetchSettings(),
+  });
 
   const q = useQuery({
     queryKey: ["application", id],
@@ -114,7 +120,9 @@ function AppDetail() {
           <Card>
             <CardHeader>
               <CardTitle>Connect data sources</CardTitle>
-              <CardDescription>Simulated sandbox connections. {connectedCount}/4 connected.</CardDescription>
+              <CardDescription>
+                Connection status is based on the current saved mode per source. {connectedCount}/4 connected.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Progress value={(connectedCount / 4) * 100} className="mb-6 h-2" />
@@ -124,10 +132,15 @@ function AppDetail() {
                   const status = c?.status ?? "pending";
                   return (
                     <div key={src.key} className="rounded-lg border p-4 space-y-3">
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start justify-between gap-3">
                         <div>
                           <div className="font-medium">{src.label}</div>
                           <div className="text-xs text-muted-foreground">{src.description}</div>
+                          <div className="mt-2">
+                            <Badge variant={settingsQuery.data?.[src.key]?.mode === "sandbox" ? "secondary" : "outline"} className="text-xs uppercase">
+                              {settingsQuery.data?.[src.key]?.mode === "sandbox" ? "Sandbox" : "Mock"}
+                            </Badge>
+                          </div>
                         </div>
                         <SourceStatusIcon status={status} />
                       </div>
