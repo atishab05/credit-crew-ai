@@ -1,0 +1,38 @@
+import type { AdapterContext, HealthCheckResult, UpiMetadata } from "./types";
+import { seededRand } from "./util";
+
+export function fetchMock(ctx: AdapterContext): UpiMetadata {
+  const rand = seededRand(ctx.applicantId + "upi");
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const base = 800000 + Math.floor(rand() * 900000);
+    return { month: i + 1, value: Math.round(base * (0.7 + rand() * 0.6)) };
+  });
+  return {
+    monthly_collections: months,
+    collection_velocity_days: 6 + Math.floor(rand() * 10),
+  };
+}
+
+export async function fetchSandbox(ctx: AdapterContext): Promise<UpiMetadata> {
+  const base = process.env.IDBI_UPI_BASE_URL;
+  const key = process.env.IDBI_UPI_API_KEY;
+  if (!base || !key) return fetchMock(ctx);
+  const res = await fetch(`${base.replace(/\/$/, "")}/merchant/${encodeURIComponent(ctx.pan)}/collections`, {
+    headers: { Authorization: `Bearer ${key}`, Accept: "application/json" },
+  });
+  if (!res.ok) throw new Error(`UPI sandbox error [${res.status}]: ${await res.text()}`);
+  return (await res.json()) as UpiMetadata;
+}
+
+export async function healthCheck(): Promise<HealthCheckResult> {
+  const base = process.env.IDBI_UPI_BASE_URL;
+  const key = process.env.IDBI_UPI_API_KEY;
+  const t0 = Date.now();
+  if (!base || !key) return { ok: true, latency_ms: 0, mode: "mock" };
+  try {
+    const res = await fetch(`${base.replace(/\/$/, "")}/health`, { headers: { Authorization: `Bearer ${key}` } });
+    return { ok: res.ok, latency_ms: Date.now() - t0, mode: "sandbox", error: res.ok ? undefined : `HTTP ${res.status}` };
+  } catch (e: any) {
+    return { ok: false, latency_ms: Date.now() - t0, mode: "sandbox", error: e?.message ?? "unreachable" };
+  }
+}
