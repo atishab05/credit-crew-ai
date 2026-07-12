@@ -102,8 +102,8 @@ export function DocumentsPanel({ applicationId }: { applicationId: string }) {
           <ShieldCheck className="h-5 w-5 text-accent" /> Supporting documents
         </CardTitle>
         <CardDescription>
-          Stored in an encrypted AWS S3 bucket with server-side encryption (SSE) and audit logging.
-          Access is scoped to the owning loan officer via short-lived signed URLs.
+          Stored in an encrypted AWS S3 bucket with server-side encryption (SSE) and audit logging when AWS is connected.
+          When AWS is unavailable, files are stored locally on the app server for hackathon/demo use.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

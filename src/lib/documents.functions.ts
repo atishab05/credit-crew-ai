@@ -1,10 +1,30 @@
+import crypto from "crypto";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev";
+const LOCAL_UPLOAD_BASE = "local_uploads";
+const LOCAL_UPLOAD_SECRET = process.env.LOCAL_UPLOAD_SECRET || "creditcrew-local-upload-secret";
 
-function ensureS3Env() {
+type StorageMode = "aws" | "local";
+
+function getStorageMode(): StorageMode {
+  return process.env.AWS_S3_API_KEY && process.env.LOVABLE_API_KEY ? "aws" : "local";
+}
+
+function isAwsMode() {
+  return getStorageMode() === "aws";
+}
+
+function signLocalKey(key: string, expires: number) {
+  return crypto
+    .createHmac("sha256", LOCAL_UPLOAD_SECRET)
+    .update(`${key}|${expires}`)
+    .digest("hex");
+}
+
+function ensureAwsEnv() {
   const lovable = process.env.LOVABLE_API_KEY;
   const s3 = process.env.AWS_S3_API_KEY;
   if (!lovable || !s3) {
@@ -18,7 +38,10 @@ function ensureS3Env() {
 export const isS3Configured = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async () => {
-    return { configured: Boolean(process.env.AWS_S3_API_KEY && process.env.LOVABLE_API_KEY) };
+    return {
+      configured: true,
+      storage_mode: getStorageMode(),
+    };
   });
 
 async function assertApplicationOwnership(context: any, application_id: string) {
@@ -47,24 +70,32 @@ export const getUploadUrl = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertApplicationOwnership(context, data.application_id);
-    const { lovable, s3 } = ensureS3Env();
 
     const key = `applications/${data.application_id}/${Date.now()}_${safeFilename(data.filename)}`;
-    const res = await fetch(`${GATEWAY_URL}/api/v1/sign_storage_url?provider=aws_s3&mode=write`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovable}`,
-        "X-Connection-Api-Key": s3,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ object_path: key }),
-    });
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`Could not create upload URL [${res.status}]: ${body}`);
+
+    if (isAwsMode()) {
+      const { lovable, s3 } = ensureAwsEnv();
+      const res = await fetch(`${GATEWAY_URL}/api/v1/sign_storage_url?provider=aws_s3&mode=write`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${lovable}`,
+          "X-Connection-Api-Key": s3,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ object_path: key }),
+      });
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`Could not create upload URL [${res.status}]: ${body}`);
+      }
+      const { url, expires_in, method } = await res.json();
+      return { upload_url: url as string, method: (method as string) ?? "PUT", expires_in, s3_key: key };
     }
-    const { url, expires_in, method } = await res.json();
-    return { upload_url: url as string, method: (method as string) ?? "PUT", expires_in, s3_key: key };
+
+    const expires = Date.now() + 60_000;
+    const sig = signLocalKey(key, expires);
+    const uploadUrl = `/api/local-documents/upload?key=${encodeURIComponent(key)}&expires=${expires}&sig=${sig}`;
+    return { upload_url: uploadUrl, method: "PUT", expires_in: 60, s3_key: key };
   });
 
 export const registerDocument = createServerFn({ method: "POST" })
@@ -124,7 +155,6 @@ export const getDownloadUrl = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertApplicationOwnership(context, data.application_id);
-    const { lovable, s3 } = ensureS3Env();
     const { data: doc, error } = await (context.supabase as any)
       .from("documents")
       .select("*")
@@ -134,19 +164,30 @@ export const getDownloadUrl = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!doc) throw new Error("Document not found");
 
-    const res = await fetch(`${GATEWAY_URL}/api/v1/sign_storage_url?provider=aws_s3&mode=read`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovable}`,
-        "X-Connection-Api-Key": s3,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ object_path: doc.s3_key }),
-    });
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`Could not create download URL [${res.status}]: ${body}`);
+    if (isAwsMode()) {
+      const { lovable, s3 } = ensureAwsEnv();
+      const res = await fetch(`${GATEWAY_URL}/api/v1/sign_storage_url?provider=aws_s3&mode=read`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${lovable}`,
+          "X-Connection-Api-Key": s3,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ object_path: doc.s3_key }),
+      });
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`Could not create download URL [${res.status}]: ${body}`);
+      }
+      const { url, expires_in } = await res.json();
+      return { download_url: url as string, expires_in, filename: doc.filename as string };
     }
-    const { url, expires_in } = await res.json();
-    return { download_url: url as string, expires_in, filename: doc.filename as string };
+
+    const expires = Date.now() + 60_000;
+    const sig = signLocalKey(doc.s3_key, expires);
+    return {
+      download_url: `/api/local-documents/download?key=${encodeURIComponent(doc.s3_key)}&expires=${expires}&sig=${sig}`,
+      expires_in: 60,
+      filename: doc.filename as string,
+    };
   });
