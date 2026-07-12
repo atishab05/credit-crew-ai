@@ -25,6 +25,9 @@ export const DATA_SOURCES = [
   { key: "upi", label: "UPI", description: "Digital collections & payouts" },
   { key: "aa", label: "Account Aggregator", description: "Bank statement rails" },
   { key: "epfo", label: "EPFO", description: "Workforce & payroll signals" },
+  { key: "electricity", label: "Electricity", description: "Utility consumption & operational activity" },
+  { key: "fuel", label: "Fuel Costs", description: "Operational cost data for trading & logistics" },
+  { key: "digital_footprint", label: "Digital Footprint", description: "Platform activity, e-commerce & business discipline" },
 ] as const;
 
 export type DataSource = (typeof DATA_SOURCES)[number]["key"];

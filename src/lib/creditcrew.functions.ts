@@ -40,7 +40,7 @@ export const createApplication = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
 
-    const sources = ["gst", "upi", "aa", "epfo"];
+    const sources = ["gst", "upi", "aa", "epfo", "electricity", "fuel", "digital_footprint"];
     await (supabase as any).from("data_connections").insert(
       sources.map((s) => ({ application_id: app.id, source: s, status: "pending" })),
     );
@@ -94,7 +94,7 @@ export const connectSource = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({
       application_id: z.string().uuid(),
-      source: z.enum(["gst", "upi", "aa", "epfo"]),
+      source: z.enum(["gst", "upi", "aa", "epfo", "electricity", "fuel", "digital_footprint"]),
       simulateFailure: z.boolean().optional(),
     }).parse(d),
   )
@@ -252,33 +252,78 @@ export const runAssessment = createServerFn({ method: "POST" })
     const available = (conns ?? []).filter((c: any) => c.status === "connected");
     const rand = seededRand(app.pan);
 
-    const gst = available.find((c: any) => c.source === "gst")?.metadata ?? null;
-    const upi = available.find((c: any) => c.source === "upi")?.metadata ?? null;
-    const aa = available.find((c: any) => c.source === "aa")?.metadata ?? null;
-    const epfo = available.find((c: any) => c.source === "epfo")?.metadata ?? null;
+    const gst   = available.find((c: any) => c.source === "gst")?.metadata ?? null;
+    const upi   = available.find((c: any) => c.source === "upi")?.metadata ?? null;
+    const aa    = available.find((c: any) => c.source === "aa")?.metadata ?? null;
+    const epfo  = available.find((c: any) => c.source === "epfo")?.metadata ?? null;
+    const elec  = available.find((c: any) => c.source === "electricity")?.metadata ?? null;
+    const fuel  = available.find((c: any) => c.source === "fuel")?.metadata ?? null;
+    const digi  = available.find((c: any) => c.source === "digital_footprint")?.metadata ?? null;
 
+    const TOTAL_SOURCES = 7;
     const agentOutputs: Record<string, any> = {};
 
     const steps: { name: string; run: () => any }[] = [
-      { name: "financial_data", run: () => ({ sources_connected: available.map((c: any) => c.source), annual_turnover: gst?.annual_turnover ?? Math.round(6_000_000 + rand() * 8_000_000), employees: epfo?.employees ?? 12 }) },
+      { name: "financial_data", run: () => ({
+        sources_connected: available.map((c: any) => c.source),
+        annual_turnover: gst?.annual_turnover ?? Math.round(6_000_000 + rand() * 8_000_000),
+        employees: epfo?.employees ?? 12,
+        avg_monthly_kwh: elec?.avg_monthly_kwh ?? null,
+        avg_monthly_fuel_spend: fuel?.avg_monthly_fuel_spend ?? null,
+      }) },
       { name: "revenue_intelligence", run: () => {
         const months = gst?.months ?? upi?.monthly_collections ?? [];
         const values = months.map((m: any) => m.value);
         const avg = values.length ? values.reduce((a: number, b: number) => a + b, 0) / values.length : 1_200_000;
         const growth = values.length >= 2 ? Math.round(((values.at(-1) - values[0]) / values[0]) * 100) : Math.round(rand() * 20 - 5);
         const stability = Math.max(30, 90 - Math.abs(growth));
-        return { avg_monthly_revenue: Math.round(avg), yoy_growth_pct: growth, stability_score: stability, series: values };
+        // Electricity trend corroborates revenue growth for manufacturing units
+        const elec_corroboration = elec ? (elec.avg_monthly_kwh > 2000 ? "high_activity" : "moderate_activity") : null;
+        return { avg_monthly_revenue: Math.round(avg), yoy_growth_pct: growth, stability_score: stability, series: values, elec_corroboration };
       } },
-      { name: "cash_flow", run: () => ({ liquidity_ratio: +(1.1 + rand() * 1.2).toFixed(2), cash_conversion_days: aa?.cash_conversion_days ?? 45, working_capital_gap: Math.round(200000 + rand() * 500000) }) },
-      { name: "compliance", run: () => ({ gst_filings_on_time_pct: gst?.filings_on_time_pct ?? 78, tax_consistency: rand() > 0.3 ? "consistent" : "minor_variances", late_filings_last_12m: Math.floor(rand() * 3) }) },
-      { name: "payment_behaviour", run: () => ({ upi_collection_velocity_days: upi?.collection_velocity_days ?? 9, supplier_payment_on_time_pct: 70 + Math.floor(rand() * 25), avg_ticket_size: Math.round(2500 + rand() * 4000) }) },
+      { name: "cash_flow", run: () => {
+        const liquidity_ratio = +(1.1 + rand() * 1.2).toFixed(2);
+        const fuel_cost_to_turnover_pct = fuel?.fuel_cost_to_turnover_pct ?? null;
+        // High fuel cost intensity (>10%) puts pressure on working capital
+        const fuel_pressure = fuel_cost_to_turnover_pct !== null && fuel_cost_to_turnover_pct > 10;
+        return {
+          liquidity_ratio: fuel_pressure ? Math.max(1.0, liquidity_ratio - 0.2) : liquidity_ratio,
+          cash_conversion_days: aa?.cash_conversion_days ?? 45,
+          working_capital_gap: Math.round(200000 + rand() * 500000),
+          fuel_cost_to_turnover_pct,
+        };
+      } },
+      { name: "compliance", run: () => ({
+        gst_filings_on_time_pct: gst?.filings_on_time_pct ?? 78,
+        tax_consistency: rand() > 0.3 ? "consistent" : "minor_variances",
+        late_filings_last_12m: Math.floor(rand() * 3),
+        electricity_bill_on_time_pct: elec?.on_time_bill_pct ?? null,
+        epfo_pf_on_time_pct: epfo?.on_time_pf_pct ?? null,
+      }) },
+      { name: "payment_behaviour", run: () => ({
+        upi_collection_velocity_days: upi?.collection_velocity_days ?? 9,
+        supplier_payment_on_time_pct: 70 + Math.floor(rand() * 25),
+        avg_ticket_size: Math.round(2500 + rand() * 4000),
+        upi_sale_txn_pct: upi?.sale_txn_pct ?? null,
+        upi_purchase_txn_pct: upi?.purchase_txn_pct ?? null,
+        upi_total_transactions_12m: upi?.total_transactions_12m ?? null,
+        upi_discipline_label: upi?.discipline_label ?? null,
+      }) },
       { name: "risk", run: () => {
         const flags: string[] = [];
         const conc = 30 + Math.round(rand() * 45);
         if (conc > 55) flags.push(`Top customer concentration ${conc}%`);
         if (rand() > 0.75) flags.push("Revenue anomaly detected in Q2");
-        if (available.length < 4) flags.push(`${4 - available.length} data source(s) unavailable`);
-        return { concentration_risk_pct: conc, anomaly_flags: flags, fraud_signals: 0 };
+        if (fuel?.fuel_cost_to_turnover_pct > 12) flags.push(`Fuel cost intensity elevated at ${fuel.fuel_cost_to_turnover_pct}% of turnover`);
+        if (digi && digi.last_activity_days_ago > 30) flags.push(`Digital platform inactive for ${digi.last_activity_days_ago} days`);
+        if (upi?.discipline_label === "non_disciplined") flags.push("UPI transaction pattern classified as non-disciplined");
+        if (available.length < TOTAL_SOURCES) flags.push(`${TOTAL_SOURCES - available.length} data source(s) unavailable`);
+        return {
+          concentration_risk_pct: conc,
+          anomaly_flags: flags,
+          fraud_signals: 0,
+          digital_discipline_score: digi?.digital_discipline_score ?? null,
+        };
       } },
     ];
 
@@ -294,24 +339,32 @@ export const runAssessment = createServerFn({ method: "POST" })
     // Recommendation
     await upsertAgent(s, application_id, "recommendation", "running");
     await sleep(500);
-    const rev = agentOutputs.revenue_intelligence;
-    const cf = agentOutputs.cash_flow;
+    const rev  = agentOutputs.revenue_intelligence;
+    const cf   = agentOutputs.cash_flow;
     const comp = agentOutputs.compliance;
-    const pb = agentOutputs.payment_behaviour;
+    const pb   = agentOutputs.payment_behaviour;
     const risk = agentOutputs.risk;
 
-    const revScore = Math.min(100, rev.stability_score * 0.6 + Math.max(0, rev.yoy_growth_pct + 10) * 2);
-    const cfScore = Math.min(100, cf.liquidity_ratio * 30 + (60 - Math.min(60, cf.cash_conversion_days)));
-    const compScore = comp.gst_filings_on_time_pct - comp.late_filings_last_12m * 5;
-    const pbScore = 100 - Math.min(60, pb.upi_collection_velocity_days * 4) + (pb.supplier_payment_on_time_pct - 70) * 0.5;
+    const revScore  = Math.min(100, rev.stability_score * 0.6 + Math.max(0, rev.yoy_growth_pct + 10) * 2);
+    const cfScore   = Math.min(100, cf.liquidity_ratio * 30 + (60 - Math.min(60, cf.cash_conversion_days)));
+    // Compliance: incorporate electricity and EPFO on-time rates where available
+    const elecBill  = comp.electricity_bill_on_time_pct ?? comp.gst_filings_on_time_pct;
+    const pfOnTime  = comp.epfo_pf_on_time_pct ?? 90;
+    const compScore = (comp.gst_filings_on_time_pct * 0.6 + elecBill * 0.2 + pfOnTime * 0.2) - comp.late_filings_last_12m * 5;
+    // Payment behaviour: incorporate UPI discipline label and transaction volume
+    const disciplineBonus = pb.upi_discipline_label === "disciplined" ? 8 : pb.upi_discipline_label === "non_disciplined" ? -10 : 0;
+    const txnVolumeBonus  = pb.upi_total_transactions_12m ? Math.min(10, pb.upi_total_transactions_12m / 60) : 0;
+    const pbScore = 100 - Math.min(60, pb.upi_collection_velocity_days * 4) + (pb.supplier_payment_on_time_pct - 70) * 0.5 + disciplineBonus + txnVolumeBonus;
+    // Digital footprint bonus (up to +8 points)
+    const digiBonus = risk.digital_discipline_score !== null ? (risk.digital_discipline_score / 100) * 8 : 0;
     const riskPenalty = risk.concentration_risk_pct * 0.4 + risk.anomaly_flags.length * 6;
 
-    const raw = revScore * 0.30 + cfScore * 0.25 + compScore * 0.20 + pbScore * 0.15 - riskPenalty * 0.5 + 20;
+    const raw = revScore * 0.28 + cfScore * 0.23 + compScore * 0.19 + pbScore * 0.14 + digiBonus - riskPenalty * 0.5 + 20;
     const health = Math.max(20, Math.min(96, Math.round(raw)));
     const risk_rating = health >= 78 ? "Low" : health >= 60 ? "Moderate" : health >= 45 ? "Elevated" : "High";
     const capacity = Math.round(rev.avg_monthly_revenue * 0.30 * 12 * (health / 100));
     const product = cf.liquidity_ratio < 1.4 ? "Working Capital Loan" : health >= 75 ? "Term Loan" : rev.yoy_growth_pct > 12 ? "Equipment Finance" : "Overdraft Facility";
-    const confidence = available.length === 4 ? "high" : available.length >= 2 ? "medium" : "low";
+    const confidence = available.length === TOTAL_SOURCES ? "high" : available.length >= 4 ? "medium" : "low";
 
     const recOutput = {
       overall_health_score: health,
@@ -319,7 +372,14 @@ export const runAssessment = createServerFn({ method: "POST" })
       borrowing_capacity: capacity,
       recommended_loan_product: product,
       confidence_level: confidence,
-      component_scores: { revenue: Math.round(revScore), cash_flow: Math.round(cfScore), compliance: Math.round(compScore), payment_behaviour: Math.round(pbScore), risk_penalty: Math.round(riskPenalty) },
+      component_scores: {
+        revenue: Math.round(revScore),
+        cash_flow: Math.round(cfScore),
+        compliance: Math.round(compScore),
+        payment_behaviour: Math.round(pbScore),
+        digital_footprint: Math.round(digiBonus),
+        risk_penalty: Math.round(riskPenalty),
+      },
     };
     agentOutputs.recommendation = recOutput;
     await upsertAgent(s, application_id, "recommendation", "completed", recOutput);
@@ -330,11 +390,16 @@ export const runAssessment = createServerFn({ method: "POST" })
     const reasons: string[] = [];
     reasons.push(`Average monthly revenue estimated at ₹${(rev.avg_monthly_revenue / 100000).toFixed(1)}L with ${rev.yoy_growth_pct}% YoY movement.`);
     reasons.push(`Liquidity ratio ${cf.liquidity_ratio} and cash conversion of ${cf.cash_conversion_days} days ${cf.liquidity_ratio < 1.4 ? "signal working-capital pressure" : "indicate healthy working capital"}.`);
+    if (cf.fuel_cost_to_turnover_pct !== null) reasons.push(`Fuel costs represent ${cf.fuel_cost_to_turnover_pct}% of turnover — ${cf.fuel_cost_to_turnover_pct > 10 ? "elevated operational cost intensity, weighing on working capital" : "within normal range for sector"}.`);
     reasons.push(`GST filings ${comp.gst_filings_on_time_pct}% on-time with ${comp.late_filings_last_12m} late in last 12 months.`);
+    if (comp.electricity_bill_on_time_pct !== null) reasons.push(`Electricity bills paid on time ${comp.electricity_bill_on_time_pct}% — utility payment discipline ${comp.electricity_bill_on_time_pct >= 90 ? "strong" : "needs improvement"}.`);
+    if (comp.epfo_pf_on_time_pct !== null) reasons.push(`EPFO provident fund contributions ${comp.epfo_pf_on_time_pct}% on-time.`);
     reasons.push(`UPI collection velocity of ${pb.upi_collection_velocity_days} days and ${pb.supplier_payment_on_time_pct}% on-time supplier payments.`);
+    if (pb.upi_discipline_label) reasons.push(`UPI transaction pattern (${pb.upi_total_transactions_12m} transactions, ${pb.upi_sale_txn_pct}% sales / ${pb.upi_purchase_txn_pct}% purchases) classified as ${pb.upi_discipline_label.replace("_", " ")}.`);
+    if (risk.digital_discipline_score !== null) reasons.push(`Digital footprint score ${risk.digital_discipline_score}/100 — active on ${digi?.active_platform_count} platform(s) with ${digi?.active_months_last_12} active months in the last year.`);
     if (risk.anomaly_flags.length) reasons.push(`Risk flags: ${risk.anomaly_flags.join("; ")}.`);
     reasons.push(`Borrowing capacity capped at 30% of annualised revenue, adjusted by health score ${health}/100 → ₹${(capacity / 100000).toFixed(1)}L.`);
-    if (confidence !== "high") reasons.push(`Confidence marked ${confidence} because ${4 - available.length} data source(s) were unavailable.`);
+    if (confidence !== "high") reasons.push(`Confidence marked ${confidence} because ${TOTAL_SOURCES - available.length} data source(s) were unavailable.`);
 
     const explOutput = { reasons };
     await upsertAgent(s, application_id, "explainability", "completed", explOutput);

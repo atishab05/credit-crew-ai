@@ -3,7 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import type { AdapterSource } from "@/lib/adapters/types";
 
-const SOURCES = ["gst", "upi", "aa", "epfo", "electricity"] as const;
+const SOURCES = ["gst", "upi", "aa", "epfo", "electricity", "fuel", "digital_footprint"] as const;
 export type DataSourceSetting = {
   source: AdapterSource;
   mode: "mock" | "sandbox";

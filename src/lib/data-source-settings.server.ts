@@ -44,7 +44,7 @@ export async function getAllDataSourceSettings(): Promise<Record<AdapterSource, 
 
   if (isMissingSettingsTable(error)) {
     return Object.fromEntries(
-      (["gst", "upi", "aa", "epfo", "electricity"] as const).map((s) => [s, { source: s, mode: "mock" as const, base_url: null }])
+      (["gst", "upi", "aa", "epfo", "electricity", "fuel", "digital_footprint"] as const).map((s) => [s, { source: s, mode: "mock" as const, base_url: null }])
     ) as Record<AdapterSource, DataSourceSetting>;
   }
   if (error) throw new Error(error.message);
@@ -59,7 +59,7 @@ export async function getAllDataSourceSettings(): Promise<Record<AdapterSource, 
     return acc;
   }, {} as Record<AdapterSource, DataSourceSetting>);
 
-  for (const source of ["gst", "upi", "aa", "epfo", "electricity"] as const) {
+  for (const source of ["gst", "upi", "aa", "epfo", "electricity", "fuel", "digital_footprint"] as const) {
     if (!settings[source]) {
       settings[source] = { source, mode: "mock", base_url: null };
     }

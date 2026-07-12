@@ -4,9 +4,11 @@ import * as upi from "./upi";
 import * as aa from "./aa";
 import * as epfo from "./epfo";
 import * as electricity from "./electricity";
+import * as fuel from "./fuel";
+import * as digital_footprint from "./digital_footprint";
 import { getDataSourceSetting } from "@/lib/data-source-settings.server";
 
-const REGISTRY = { gst, upi, aa, epfo, electricity } as const;
+const REGISTRY = { gst, upi, aa, epfo, electricity, fuel, digital_footprint } as const;
 
 export async function fetchMetadata(source: AdapterSource, ctx: AdapterContext): Promise<ConnectionMetadata> {
   const setting = await getDataSourceSetting(source);

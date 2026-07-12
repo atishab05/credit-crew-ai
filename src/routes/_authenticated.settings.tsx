@@ -13,10 +13,12 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const SOURCES: Array<{ id: AdapterSource; label: string; description: string }> = [
   { id: "gst", label: "GST", description: "Goods and Services Tax data" },
-  { id: "upi", label: "UPI", description: "Unified Payments Interface collections" },
+  { id: "upi", label: "UPI", description: "Unified Payments Interface collections & transaction patterns" },
   { id: "aa", label: "Account Aggregator", description: "AA transaction summary" },
   { id: "epfo", label: "EPFO", description: "Employee PF contributions" },
-  { id: "electricity", label: "Electricity", description: "Utility consumption profile" },
+  { id: "electricity", label: "Electricity", description: "Utility consumption & operational activity indicator" },
+  { id: "fuel", label: "Fuel Costs", description: "Operational cost data for trading & logistics entities" },
+  { id: "digital_footprint", label: "Digital Footprint", description: "Platform activity, e-commerce & business discipline" },
 ];
 
 export const Route = createFileRoute("/_authenticated/settings")({

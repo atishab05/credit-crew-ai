@@ -29,6 +29,7 @@ export async function healthCheck(config?: AdapterSandboxConfig): Promise<Health
   const t0 = Date.now();
   if (!base || !key) return { ok: true, latency_ms: 0, mode: "mock" };
   try {
+    const res = await fetch(`${base}/health`, { headers: { Authorization: `Bearer ${key}` } });
     return { ok: res.ok, latency_ms: Date.now() - t0, mode: "sandbox", error: res.ok ? undefined : `HTTP ${res.status}` };
   } catch (e: any) {
     return { ok: false, latency_ms: Date.now() - t0, mode: "sandbox", error: e?.message ?? "unreachable" };

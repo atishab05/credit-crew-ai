@@ -7,9 +7,21 @@ export function fetchMock(ctx: AdapterContext): UpiMetadata {
     const base = 800000 + Math.floor(rand() * 900000);
     return { month: i + 1, value: Math.round(base * (0.7 + rand() * 0.6)) };
   });
+  const velocity = 6 + Math.floor(rand() * 10);
+  const sale_txn_pct = 40 + Math.floor(rand() * 35);       // 40–75% sales
+  const purchase_txn_pct = 15 + Math.floor(rand() * 25);   // 15–40% purchases
+  const total_transactions_12m = 120 + Math.floor(rand() * 480);
+  const discipline_label: UpiMetadata["discipline_label"] =
+    velocity <= 8 && sale_txn_pct >= 55 ? "disciplined"
+    : velocity <= 12 ? "irregular"
+    : "non_disciplined";
   return {
     monthly_collections: months,
-    collection_velocity_days: 6 + Math.floor(rand() * 10),
+    collection_velocity_days: velocity,
+    sale_txn_pct,
+    purchase_txn_pct,
+    total_transactions_12m,
+    discipline_label,
   };
 }
 
