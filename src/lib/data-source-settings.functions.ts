@@ -61,10 +61,31 @@ export const saveDataSourceSettings = createServerFn({ method: "POST" })
       base_url: setting.base_url?.trim() || null,
     }));
 
+    const { data: existingSettings, error: fetchError } = await context.supabase
+      .from("data_source_settings")
+      .select("source, mode");
+    if (fetchError) throw new Error(fetchError.message);
+
+    const changedSources = upserts
+      .filter((setting) => {
+        const existing = (existingSettings ?? []).find((row: any) => row.source === setting.source);
+        return existing ? existing.mode !== setting.mode : false;
+      })
+      .map((setting) => setting.source);
+
     const { error } = await context.supabase
       .from("data_source_settings")
       .upsert(upserts, { onConflict: ["source"] });
 
     if (error) throw new Error(error.message);
+
+    if (changedSources.length > 0) {
+      const { error: resetError } = await context.supabase
+        .from("data_connections")
+        .update({ status: "pending", connected_at: null, metadata: null })
+        .in("source", changedSources);
+      if (resetError) throw new Error(resetError.message);
+    }
+
     return { ok: true };
   });
