@@ -1,8 +1,7 @@
+# AWS production deploy — manual only until hackathon selection / IDBI infra is ready.
+# For the hackathon, publish via Lovable; run this workflow after AWS is provisioned.
 name: deploy
 on:
-  push:
-    branches: [main]
-    paths-ignore: ["docs/**", "**/*.md"]
   workflow_dispatch:
     inputs:
       environment:
@@ -18,6 +17,7 @@ permissions:
 
 jobs:
   build-and-deploy:
+    if: ${{ secrets.AWS_DEPLOY_ROLE_ARN != '' }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'dev' }}
     env:
