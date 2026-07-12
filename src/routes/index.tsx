@@ -189,7 +189,7 @@ function LandingPage() {
       </main>
 
       <footer className="border-t px-4 py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} CreditCrew AI. Built for the hackathon.
+        © {new Date().getFullYear()} Atisha Banjare. Built for the IDBI hackathon.
       </footer>
     </div>
   );
