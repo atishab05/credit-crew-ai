@@ -150,7 +150,7 @@ export const connectSource = createServerFn({ method: "POST" })
         { onConflict: ["application_id", "source"] },
       );
     if (error) throw new Error(error.message);
-    return { ok: true, status, mode };
+    return { ok: true, status, mode, metadata };
   });
 
 

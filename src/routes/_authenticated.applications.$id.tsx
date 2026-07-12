@@ -48,7 +48,14 @@ function AppDetail() {
 
   const connectMut = useMutation({
     mutationFn: (v: { source: DataSource; simulateFailure?: boolean }) => connect({ data: { application_id: id, source: v.source, simulateFailure: v.simulateFailure } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["application", id] }),
+    onSuccess: (res: any) => {
+      qc.invalidateQueries({ queryKey: ["application", id] });
+      if (res?.metadata?.error) {
+        toast.error(res.metadata.error + (res?.mode ? ` (${res.mode})` : ""));
+      } else {
+        toast.success(res?.status === "connected" ? "Connected" : "Updated");
+      }
+    },
     onError: (e: any) => toast.error(e?.message ?? "Failed"),
   });
 
@@ -152,6 +159,12 @@ function AppDetail() {
                           Simulate failure
                         </Button>
                       </div>
+                      {c?.metadata?.error && (
+                        <div className="mt-2 rounded-md border border-destructive/20 bg-destructive/5 p-2">
+                          <div className="text-sm font-medium text-destructive">Connection error</div>
+                          <div className="text-xs text-destructive/90 mt-1">{c.metadata.error}{c?.metadata?.mode ? ` (${c.metadata.mode})` : ""}</div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
