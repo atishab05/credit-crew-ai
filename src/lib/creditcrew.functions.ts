@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { fetchMetadata, healthCheck as adapterHealthCheck, currentMode } from "@/lib/adapters";
+
 
 const PAN = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 const GSTIN = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z]Z[0-9A-Z]$/;
@@ -97,18 +99,38 @@ export const connectSource = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const s = context.supabase as any;
-    const status = data.simulateFailure ? "failed" : "connected";
-    const metadata = data.simulateFailure
-      ? { error: "Sandbox API unreachable" }
-      : buildMockConnectionMetadata(data.source, data.application_id);
+    const { data: app } = await s.from("applications").select("pan,gstin").eq("id", data.application_id).maybeSingle();
+    const ctx = { applicantId: data.application_id, pan: app?.pan ?? "", gstin: app?.gstin ?? "" };
+
+    let status: "connected" | "failed" = "connected";
+    let metadata: any = null;
+    let mode: "mock" | "sandbox" = currentMode();
+
+    if (data.simulateFailure) {
+      status = "failed";
+      metadata = { error: "Sandbox API unreachable", mode };
+    } else {
+      try {
+        // Health-check sandbox reachability before pulling data.
+        const hc = await adapterHealthCheck(data.source);
+        mode = hc.mode;
+        if (!hc.ok) throw new Error(hc.error ?? "health check failed");
+        metadata = { ...(await fetchMetadata(data.source, ctx)), mode };
+      } catch (e: any) {
+        status = "failed";
+        metadata = { error: e?.message ?? "adapter failure", mode };
+      }
+    }
+
     const { error } = await s
       .from("data_connections")
       .update({ status, connected_at: new Date().toISOString(), metadata })
       .eq("application_id", data.application_id)
       .eq("source", data.source);
     if (error) throw new Error(error.message);
-    return { ok: true, status };
+    return { ok: true, status, mode };
   });
+
 
 export const submitDecision = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
