@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, FilePlus2, TrendingUp, CheckCircle2, Clock } from "lucide-react";
 import { formatCurrency, statusBadge, riskBadge } from "@/components/creditcrew/format";
 import { maskPan, maskGstin } from "@/lib/pii";
+import { AdapterHealthWidget } from "@/components/creditcrew/AdapterHealthWidget";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -44,6 +45,8 @@ function Dashboard() {
         <StatCard label="Ready for review" value={stats.completed - stats.decided} icon={ArrowRight} />
         <StatCard label="Decisions made" value={stats.decided} icon={CheckCircle2} />
       </div>
+
+      <AdapterHealthWidget />
 
       <Card>
         <CardHeader><CardTitle>Recent assessments</CardTitle></CardHeader>

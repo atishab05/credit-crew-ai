@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { fetchMetadata, healthCheck as adapterHealthCheck } from "@/lib/adapters";
 import { getAllDataSourceSettings } from "@/lib/data-source-settings.server";
+import type { AdapterSource } from "@/lib/adapters/types";
 
 
 const PAN = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
@@ -187,6 +188,26 @@ export const submitDecision = createServerFn({ method: "POST" })
       details: { decision: data.decision, notes: data.notes ?? null },
     });
     return { ok: true };
+  });
+
+// ---------- Adapter health checks ----------
+
+const ALL_SOURCES: AdapterSource[] = ["gst", "upi", "aa", "epfo", "electricity", "fuel", "digital_footprint"];
+
+export const checkAdapterHealth = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const results = await Promise.all(
+      ALL_SOURCES.map(async (source) => {
+        try {
+          const hc = await adapterHealthCheck(source);
+          return { source, ok: hc.ok, latency_ms: hc.latency_ms, mode: hc.mode, error: hc.error ?? null };
+        } catch (e: any) {
+          return { source, ok: false, latency_ms: 0, mode: "mock" as const, error: e?.message ?? "unknown error" };
+        }
+      }),
+    );
+    return results;
   });
 
 // ---------- Agent simulation ----------

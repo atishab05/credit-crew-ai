@@ -66,7 +66,7 @@ export const saveDataSourceSettings = createServerFn({ method: "POST" })
       .object({
         settings: z.array(
           z.object({
-            source: z.enum(SOURCES as readonly ["gst", "upi", "aa", "epfo", "electricity"]),
+            source: z.enum(SOURCES),
             mode: z.enum(["mock", "sandbox"]),
             base_url: z.string().nullable().optional(),
           }),
