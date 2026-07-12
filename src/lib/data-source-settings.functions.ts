@@ -10,6 +10,27 @@ export type DataSourceSetting = {
   base_url: string | null;
 };
 
+function defaultSetting(source: AdapterSource): DataSourceSetting {
+  return { source, mode: "mock", base_url: null };
+}
+
+function defaultSettings(): Record<AdapterSource, DataSourceSetting> {
+  return SOURCES.reduce((acc, source) => {
+    acc[source] = defaultSetting(source);
+    return acc;
+  }, {} as Record<AdapterSource, DataSourceSetting>);
+}
+
+function isMissingSettingsTable(error: { code?: string; message?: string; details?: string } | null): boolean {
+  if (!error) return false;
+  const text = `${error.message ?? ""} ${error.details ?? ""}`;
+  return (
+    error.code === "PGRST205" ||
+    error.code === "42P01" ||
+    (text.includes("data_source_settings") && /schema cache|does not exist|not find/i.test(text))
+  );
+}
+
 export const getDataSourceSettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -17,6 +38,7 @@ export const getDataSourceSettings = createServerFn({ method: "GET" })
       .from("data_source_settings")
       .select("source, mode, base_url");
 
+    if (isMissingSettingsTable(error)) return defaultSettings();
     if (error) throw new Error(error.message);
 
     const settings = (data ?? []).reduce((acc, row) => {
@@ -32,7 +54,7 @@ export const getDataSourceSettings = createServerFn({ method: "GET" })
 
     for (const source of SOURCES) {
       if (!settings[source]) {
-        settings[source] = { source, mode: "mock", base_url: null };
+        settings[source] = defaultSetting(source);
       }
     }
 
