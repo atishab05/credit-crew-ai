@@ -1,0 +1,10 @@
+environment = "prod"
+aws_region  = "ap-south-1"
+app_desired_count = 4
+app_cpu = 2048
+app_memory = 4096
+db_instance_class = "db.m6g.large"
+db_allocated_storage = 200
+log_retention_days = 731
+public_domain = "creditcrew.idbi.example"
+# acm_certificate_arn = "arn:aws:acm:us-east-1:...:certificate/..."
