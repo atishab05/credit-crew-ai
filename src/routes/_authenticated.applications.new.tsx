@@ -116,7 +116,8 @@ function NewApplication() {
               <Checkbox checked={consent} onCheckedChange={(v) => setConsent(v === true)} />
               <span>
                 I confirm the borrower has given explicit, informed consent to fetch and process
-                GST, UPI, Account Aggregator and EPFO data for the purpose of this credit assessment.
+                GST, UPI, Account Aggregator, EPFO, Electricity, Fuel and Digital Footprint data
+                for the purpose of this credit assessment.
               </span>
             </label>
           </div>

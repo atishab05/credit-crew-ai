@@ -149,7 +149,7 @@ function SettingsPage() {
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm text-muted-foreground max-w-2xl">
-              When sandbox is selected, the app will attempt to use the configured base URL and the existing environment API keys. If sandbox is unavailable, the connection will fail and fall back to mock mode for future requests.
+              When sandbox is selected, the app will attempt to use the configured base URL and the existing environment API keys. If sandbox is unavailable, the connection attempt will be marked as failed — there is no automatic fallback to mock mode.
             </div>
             <Button onClick={handleSave} disabled={saving || isFetching}>
               {saving ? "Saving..." : "Save settings"}

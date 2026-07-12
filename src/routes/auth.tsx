@@ -67,10 +67,11 @@ function AuthPage() {
             Underwrite credit-invisible MSMEs with a crew of AI specialists.
           </h1>
           <p className="mt-4 text-primary-foreground/80 max-w-md">
-            Eight agents evaluate GST, UPI, Account Aggregator and EPFO signals in parallel — you decide.
+            Eight specialist agents evaluate seven alternative data sources — GST, UPI, Account Aggregator, EPFO, Electricity, Fuel and Digital Footprint — in parallel. You decide.
           </p>
           <ul className="mt-8 space-y-2 text-sm text-primary-foreground/80">
-            <li>• Explainable Financial Health Card</li>
+            <li>• Seven alternative data sources, zero bureau dependency</li>
+            <li>• Explainable Financial Health Card with UPI transaction patterns</li>
             <li>• Full audit trail on every decision</li>
             <li>• Human-in-the-loop by design</li>
           </ul>

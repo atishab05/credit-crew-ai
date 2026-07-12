@@ -62,9 +62,10 @@ function CompliancePage() {
                 never see the file bytes.
               </p>
               <p>
-                Analytical workloads target Amazon Athena on S3 data lakes, so lenders
-                can point CreditCrew at existing GST / bureau / bank-statement lakes
-                without moving data out of their AWS account.
+                Application servers never see uploaded file bytes — documents travel
+                directly from the browser to S3. All S3 objects are protected by
+                server-side encryption with KMS-managed keys and Object Lock for
+                immutable audit retention.
               </p>
             </CardContent>
           </Card>
@@ -230,6 +231,8 @@ function CompliancePage() {
                       { s: "Account Aggregator", m: "src/lib/adapters/aa.ts", e: "IDBI_AA_BASE_URL, IDBI_AA_API_KEY, IDBI_AA_CONSENT_HANDLE" },
                       { s: "EPFO", m: "src/lib/adapters/epfo.ts", e: "IDBI_EPFO_BASE_URL, IDBI_EPFO_API_KEY" },
                       { s: "Electricity", m: "src/lib/adapters/electricity.ts", e: "IDBI_ELEC_BASE_URL, IDBI_ELEC_API_KEY" },
+                      { s: "Fuel Costs", m: "src/lib/adapters/fuel.ts", e: "IDBI_FUEL_BASE_URL, IDBI_FUEL_API_KEY" },
+                      { s: "Digital Footprint", m: "src/lib/adapters/digital_footprint.ts", e: "IDBI_DFP_BASE_URL, IDBI_DFP_API_KEY" },
                     ].map((r) => (
                       <tr key={r.s}>
                         <td className="px-4 py-2 font-medium">{r.s}</td>

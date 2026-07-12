@@ -24,14 +24,14 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "CreditCrew AI — MSME Underwriting Workspace" },
-      { name: "description", content: "Mobile-first multi-agent AI underwriting for credit-invisible MSMEs. Assess GST, UPI, Account Aggregator and EPFO data with explainable Financial Health Cards." },
+      { name: "description", content: "Multi-agent AI underwriting for credit-invisible MSMEs. Seven alternative data sources — GST, UPI, Account Aggregator, EPFO, Electricity, Fuel and Digital Footprint — analysed by eight specialist agents with explainable Financial Health Cards." },
       { property: "og:title", content: "CreditCrew AI — MSME Underwriting Workspace" },
-      { property: "og:description", content: "Mobile-first multi-agent AI underwriting for credit-invisible MSMEs." },
+      { property: "og:description", content: "Seven alternative data sources, eight specialist agents, one explainable Financial Health Card. Multi-agent AI underwriting for credit-invisible MSMEs." },
       { property: "og:type", content: "website" },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/HF78MCOFSaM3GbWRrP7R7CYwD5G2/social-images/social-1783549801341-CCAI_Simple_Social_Preview_Image.webp" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "CreditCrew AI — MSME Underwriting Workspace" },
-      { name: "twitter:description", content: "Mobile-first multi-agent AI underwriting for credit-invisible MSMEs." },
+      { name: "twitter:description", content: "Seven alternative data sources, eight specialist agents, one explainable Financial Health Card. Multi-agent AI underwriting for credit-invisible MSMEs." },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/HF78MCOFSaM3GbWRrP7R7CYwD5G2/social-images/social-1783549801341-CCAI_Simple_Social_Preview_Image.webp" },
     ],
   }),
@@ -119,7 +119,7 @@ function LandingPage() {
               AI underwriting for credit-invisible MSMEs
             </h1>
             <p className="mt-4 text-base text-primary-foreground/80 md:text-lg">
-              GST · UPI · Account Aggregator · EPFO — analysed by specialist agents in seconds.
+              GST · UPI · Account Aggregator · EPFO · Electricity · Fuel · Digital Footprint — analysed by eight specialist agents in seconds.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
@@ -141,9 +141,9 @@ function LandingPage() {
 
         <section id="features" className="px-4 py-12 md:py-16">
           <div className="mx-auto max-w-md md:max-w-5xl">
-            <h2 className="text-center text-2xl font-semibold">Built for mobile underwriting</h2>
+            <h2 className="text-center text-2xl font-semibold">Built for MSME underwriting</h2>
             <p className="mx-auto mt-2 max-w-md text-center text-sm text-muted-foreground">
-              Run a full credit assessment from your phone, wherever you are.
+              Seven alternative data sources. Eight specialist agents. One explainable health score.
             </p>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {features.map((f) => (
@@ -196,15 +196,15 @@ function LandingPage() {
 }
 
 const features = [
-  { title: "Multi-agent analysis", desc: "Eight specialist agents review every data source.", icon: Zap },
-  { title: "Financial Health Card", desc: "Clear scores, risk ratings and borrowing capacity.", icon: BarChart3 },
-  { title: "Explainable decisions", desc: "Plain-language reasons for every recommendation.", icon: FileText },
-  { title: "Bank-grade security", desc: "Secure auth and audit-ready decision logs.", icon: Lock },
+  { title: "Seven data sources", desc: "GST, UPI, Account Aggregator, EPFO, Electricity, Fuel and Digital Footprint — all ingested in one assessment.", icon: Zap },
+  { title: "Financial Health Card", desc: "Composite score, four risk dimensions, borrowing capacity and UPI transaction patterns.", icon: BarChart3 },
+  { title: "Explainable decisions", desc: "Every recommendation includes plain-language reasons and the agent that produced it.", icon: FileText },
+  { title: "Audit-ready & compliant", desc: "Consent captured at intake, row-level security, append-only audit log and human-in-the-loop by design.", icon: Lock },
 ];
 
 const steps = [
-  "Create an MSME application with GSTIN and PAN.",
-  "Connect sandbox data sources with one tap.",
-  "Run the multi-agent assessment and watch live progress.",
-  "Review the Financial Health Card and record your decision.",
+  "Create an MSME application — capture GSTIN, PAN and borrower consent artefact.",
+  "Connect all seven alternative data sources with one tap in the Settings page.",
+  "Run the eight-agent assessment and watch live per-agent progress.",
+  "Review the Financial Health Card, attach any required documents, and record your decision.",
 ];
