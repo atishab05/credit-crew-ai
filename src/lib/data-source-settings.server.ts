@@ -7,6 +7,29 @@ export type DataSourceSetting = {
   base_url: string | null;
 };
 
+const SOURCES = ["gst", "upi", "aa", "epfo", "electricity"] as const;
+
+function defaultSetting(source: AdapterSource): DataSourceSetting {
+  return { source, mode: "mock", base_url: null };
+}
+
+function defaultSettings(): Record<AdapterSource, DataSourceSetting> {
+  return SOURCES.reduce((acc, source) => {
+    acc[source] = defaultSetting(source);
+    return acc;
+  }, {} as Record<AdapterSource, DataSourceSetting>);
+}
+
+function isMissingSettingsTable(error: { code?: string; message?: string; details?: string } | null): boolean {
+  if (!error) return false;
+  const text = `${error.message ?? ""} ${error.details ?? ""}`;
+  return (
+    error.code === "PGRST205" ||
+    error.code === "42P01" ||
+    (text.includes("data_source_settings") && /schema cache|does not exist|not find/i.test(text))
+  );
+}
+
 export async function getDataSourceSetting(source: AdapterSource): Promise<DataSourceSetting> {
   const { data, error } = await supabaseAdmin
     .from("data_source_settings")
@@ -14,10 +37,11 @@ export async function getDataSourceSetting(source: AdapterSource): Promise<DataS
     .eq("source", source)
     .maybeSingle();
 
+  if (isMissingSettingsTable(error)) return defaultSetting(source);
   if (error) throw new Error(error.message);
 
   if (!data) {
-    return { source, mode: "mock", base_url: null };
+    return defaultSetting(source);
   }
 
   return {
@@ -32,6 +56,7 @@ export async function getAllDataSourceSettings(): Promise<Record<AdapterSource, 
     .from("data_source_settings")
     .select("source, mode, base_url");
 
+  if (isMissingSettingsTable(error)) return defaultSettings();
   if (error) throw new Error(error.message);
 
   const settings = (data ?? []).reduce((acc, row) => {
@@ -44,9 +69,9 @@ export async function getAllDataSourceSettings(): Promise<Record<AdapterSource, 
     return acc;
   }, {} as Record<AdapterSource, DataSourceSetting>);
 
-  for (const source of ["gst", "upi", "aa", "epfo", "electricity"] as const) {
+  for (const source of SOURCES) {
     if (!settings[source]) {
-      settings[source] = { source, mode: "mock", base_url: null };
+      settings[source] = defaultSetting(source);
     }
   }
   return settings;
