@@ -15,12 +15,12 @@ export function fetchMock(ctx: AdapterContext): AaMetadata {
   };
 }
 
-export async function fetchSandbox(ctx: AdapterContext): Promise<AaMetadata> {
-  const base = process.env.IDBI_AA_BASE_URL;
+export async function fetchSandbox(ctx: AdapterContext, config?: AdapterSandboxConfig): Promise<AaMetadata> {
+  const base = config?.baseUrlOverride?.replace(/\/$/, "") ?? process.env.IDBI_AA_BASE_URL;
   const key = process.env.IDBI_AA_API_KEY;
   const consent = process.env.IDBI_AA_CONSENT_HANDLE; // AA per-consent handle, per RBI/ReBIT spec
   if (!base || !key) return fetchMock(ctx);
-  const res = await fetch(`${base.replace(/\/$/, "")}/statements/summary`, {
+  const res = await fetch(`${base}/statements/summary`, {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, Accept: "application/json", "Content-Type": "application/json" },
     body: JSON.stringify({ pan: ctx.pan, consentHandle: consent ?? null }),
@@ -29,13 +29,13 @@ export async function fetchSandbox(ctx: AdapterContext): Promise<AaMetadata> {
   return (await res.json()) as AaMetadata;
 }
 
-export async function healthCheck(): Promise<HealthCheckResult> {
-  const base = process.env.IDBI_AA_BASE_URL;
+export async function healthCheck(config?: AdapterSandboxConfig): Promise<HealthCheckResult> {
+  const base = config?.baseUrlOverride?.replace(/\/$/, "") ?? process.env.IDBI_AA_BASE_URL;
   const key = process.env.IDBI_AA_API_KEY;
   const t0 = Date.now();
   if (!base || !key) return { ok: true, latency_ms: 0, mode: "mock" };
   try {
-    const res = await fetch(`${base.replace(/\/$/, "")}/health`, { headers: { Authorization: `Bearer ${key}` } });
+    const res = await fetch(`${base}/health`, { headers: { Authorization: `Bearer ${key}` } });
     return { ok: res.ok, latency_ms: Date.now() - t0, mode: "sandbox", error: res.ok ? undefined : `HTTP ${res.status}` };
   } catch (e: any) {
     return { ok: false, latency_ms: Date.now() - t0, mode: "sandbox", error: e?.message ?? "unreachable" };

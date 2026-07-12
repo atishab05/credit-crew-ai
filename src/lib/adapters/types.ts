@@ -42,6 +42,10 @@ export type AdapterSource = "gst" | "upi" | "aa" | "epfo" | "electricity";
 
 export type HealthCheckResult = { ok: boolean; latency_ms: number; mode: "mock" | "sandbox"; error?: string };
 
+export type AdapterSandboxConfig = {
+  baseUrlOverride?: string | null;
+};
+
 export type AdapterContext = {
   applicantId: string;
   pan: string;

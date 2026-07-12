@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { fetchMetadata, healthCheck as adapterHealthCheck, currentMode } from "@/lib/adapters";
+import { fetchMetadata, healthCheck as adapterHealthCheck } from "@/lib/adapters";
 
 
 const PAN = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
@@ -104,7 +104,7 @@ export const connectSource = createServerFn({ method: "POST" })
 
     let status: "connected" | "failed" = "connected";
     let metadata: any = null;
-    let mode: "mock" | "sandbox" = currentMode();
+    let mode: "mock" | "sandbox" = "mock";
 
     if (data.simulateFailure) {
       status = "failed";

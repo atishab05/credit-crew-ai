@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect, Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, FilePlus2, History, LogOut, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, FilePlus2, History, LogOut, ShieldCheck, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -21,6 +21,7 @@ function AuthenticatedShell() {
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/applications/new", label: "New Assessment", icon: FilePlus2 },
     { to: "/history", label: "History", icon: History },
+    { to: "/settings", label: "Settings", icon: Settings },
   ] as const;
 
   const signOut = async () => {
