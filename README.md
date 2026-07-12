@@ -22,6 +22,14 @@ CreditCrew AI is a React and TypeScript web application built to support MSME un
 ## Agents
 This repository includes repository-specific guidance in AGENTS.md for contributors and automation. Follow those instructions when working on the project to stay aligned with the expected workflow and constraints.
 
+## Features
+- Application review workflows for MSME underwriting
+- Document management and document panel experience
+- Dashboard and history views for tracking progress
+- Guided routes for creating and viewing applications
+- Built-in error handling and reporting support
+- Responsive, modern UI with reusable component libraries
+
 ## Getting Started
 Install dependencies:
 
