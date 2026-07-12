@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Lock, FileText, Cloud, ArrowLeft, KeyRound, Database, Users } from "lucide-react";
+import { ShieldCheck, Lock, FileText, Cloud, ArrowLeft, KeyRound, Database, Users, Network, Package } from "lucide-react";
+
 
 export const Route = createFileRoute("/compliance")({
   head: () => ({
@@ -168,6 +169,103 @@ function CompliancePage() {
             </CardContent>
           </Card>
         </section>
+
+        {/* AWS reference architecture */}
+        <section className="space-y-4">
+          <div>
+            <Badge variant="outline" className="mb-2">Reference architecture</Badge>
+            <h2 className="text-2xl font-semibold">AWS-native, deployable in the bank's own account</h2>
+            <p className="text-sm text-muted-foreground mt-2 max-w-3xl">
+              CreditCrew AI ships as a container that runs on Amazon ECS Fargate inside the bank's VPC in <span className="font-mono">ap-south-1</span> (data localisation).
+              All egress to the IDBI sandbox APIs goes over private links; the public edge is fronted by CloudFront and AWS WAF.
+            </p>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base"><Network className="h-4 w-4 text-accent" /> Component map</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <pre className="text-xs bg-muted/50 rounded p-4 overflow-x-auto leading-relaxed">
+{`  Internet ─▶ CloudFront ─▶ AWS WAF ─▶ ALB ─┐
+                                            ▼
+                                   ECS Fargate (app tasks)
+                                   ├─▶ RDS Postgres (Multi-AZ, KMS, PITR)
+                                   ├─▶ S3 + KMS  (documents, audit logs / Object Lock)
+                                   ├─▶ Secrets Manager (adapter API keys, mTLS)
+                                   ├─▶ CloudWatch Logs + Alarms
+                                   └─▶ VPC Endpoint / PrivateLink ─▶ IDBI sandbox APIs`}
+              </pre>
+              <div className="text-xs text-muted-foreground mt-3">
+                Full IaC (Terraform modules for network, data, compute, edge, observability, IAM), Dockerfile, and a GitHub Actions OIDC deploy pipeline live in <span className="font-mono">terraform/</span>, <span className="font-mono">docker/</span> and <span className="font-mono">.github/workflows/</span> respectively.
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Sandbox integration model */}
+        <section className="space-y-4">
+          <div>
+            <Badge variant="outline" className="mb-2">Sandbox integration</Badge>
+            <h2 className="text-2xl font-semibold">Wired for IDBI's synthetic datasets &amp; internal APIs</h2>
+            <p className="text-sm text-muted-foreground mt-2 max-w-3xl">
+              Every alternative data source is fronted by a typed adapter. The app runs in <span className="font-mono">mock</span> mode out of the box and flips to <span className="font-mono">sandbox</span> mode once IDBI's endpoints and credentials are injected via environment variables — no code change required.
+            </p>
+          </div>
+          <Card>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+                    <tr>
+                      <th className="text-left px-4 py-2">Source</th>
+                      <th className="text-left px-4 py-2">Adapter module</th>
+                      <th className="text-left px-4 py-2">Sandbox env vars</th>
+                      <th className="text-left px-4 py-2">Fallback</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {[
+                      { s: "GST", m: "src/lib/adapters/gst.ts", e: "IDBI_GST_BASE_URL, IDBI_GST_API_KEY" },
+                      { s: "UPI", m: "src/lib/adapters/upi.ts", e: "IDBI_UPI_BASE_URL, IDBI_UPI_API_KEY" },
+                      { s: "Account Aggregator", m: "src/lib/adapters/aa.ts", e: "IDBI_AA_BASE_URL, IDBI_AA_API_KEY, IDBI_AA_CONSENT_HANDLE" },
+                      { s: "EPFO", m: "src/lib/adapters/epfo.ts", e: "IDBI_EPFO_BASE_URL, IDBI_EPFO_API_KEY" },
+                      { s: "Electricity", m: "src/lib/adapters/electricity.ts", e: "IDBI_ELEC_BASE_URL, IDBI_ELEC_API_KEY" },
+                    ].map((r) => (
+                      <tr key={r.s}>
+                        <td className="px-4 py-2 font-medium">{r.s}</td>
+                        <td className="px-4 py-2 font-mono text-xs">{r.m}</td>
+                        <td className="px-4 py-2 font-mono text-xs">{r.e}</td>
+                        <td className="px-4 py-2 text-muted-foreground">Deterministic mock</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="text-xs text-muted-foreground p-4 border-t">
+                mTLS: adapters accept <span className="font-mono">IDBI_MTLS_CERT</span>, <span className="font-mono">IDBI_MTLS_KEY</span>, <span className="font-mono">IDBI_MTLS_CA</span> secrets when IDBI requires client certificates. Egress IPs and CIDRs to allowlist are pinned by the NAT gateway provisioned in <span className="font-mono">terraform/modules/network</span>.
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Handover artifacts */}
+        <section>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base"><Package className="h-4 w-4 text-accent" /> Handover bundle for IDBI engineering</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground space-y-2">
+              <p>The following artifacts are shipped alongside the app source, ready for review by the bank's engineering and infosec teams:</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li><span className="font-mono">terraform/</span> — VPC, RDS, ECS Fargate, S3+KMS, CloudFront, WAFv2, Secrets Manager, IAM, CloudWatch. Split into modules with <span className="font-mono">dev / uat / prod</span> tfvars.</li>
+                <li><span className="font-mono">docker/Dockerfile</span> — multi-stage build; pushed to ECR by <span className="font-mono">.github/workflows/deploy.yml</span> via OIDC (no long-lived AWS keys).</li>
+                <li><span className="font-mono">docs/ARCHITECTURE.md</span>, <span className="font-mono">RUNBOOK.md</span>, <span className="font-mono">SECURITY_CONTROLS.md</span>, <span className="font-mono">SANDBOX_INTEGRATION.md</span>, <span className="font-mono">HANDOVER.md</span> — bank-review-ready markdown, PDF-convertible with pandoc.</li>
+                <li><span className="font-mono">make zip</span> produces a single self-contained handover archive for offline submission.</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </section>
+
       </main>
 
       <footer className="border-t px-4 py-6 text-center text-xs text-muted-foreground">
