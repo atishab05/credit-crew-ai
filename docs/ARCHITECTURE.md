@@ -1,7 +1,7 @@
 # CreditCrew AI — Architecture
 
 ## Purpose
-Multi-agent MSME credit underwriting workspace. Agents pull alternative data (GST, UPI, Account Aggregator, EPFO, electricity), produce a health score, risk rating, borrowing capacity and product recommendation. A loan officer retains the final decision (human-in-the-loop).
+Multi-agent MSME credit underwriting workspace. Eight specialist agents pull seven alternative data sources (GST, UPI, Account Aggregator, EPFO, Electricity, Fuel Costs and Digital Footprint), produce a health score, risk rating, borrowing capacity and product recommendation. A loan officer retains the final decision (human-in-the-loop).
 
 ## Runtime topology
 
@@ -17,7 +17,7 @@ Internet ─▶ CloudFront ▶│ AWS WAFv2 │──▶ ALB (HTTPS) ──▶ E
                                                                        │
                                                                        ▼
                                                           IDBI Sandbox APIs
-                                                          (GST / UPI / AA / EPFO / Electricity)
+                                                          (GST / UPI / AA / EPFO / Electricity / Fuel / Digital Footprint)
 ```
 
 - Region: **ap-south-1** (Mumbai) — RBI data-localisation.
@@ -37,7 +37,7 @@ Internet ─▶ CloudFront ▶│ AWS WAFv2 │──▶ ALB (HTTPS) ──▶ E
 
 1. Officer creates application → DPDP consent captured, retention set, audit event written.
 2. Officer connects each source → adapter's `healthCheck()` pings sandbox → `fetchMetadata()` writes canonical DTO to `data_connections`.
-3. Officer clicks **Run assessment** → 6 specialist agents + recommendation + explainability agent run sequentially, each writing its output + status to `agent_results` and an audit event.
+3. Officer clicks **Run assessment** → 6 specialist agents (Financial Data, Revenue Intelligence, Cash Flow, Compliance, Payment Behaviour, Risk Signals) + Recommendation + Explainability run sequentially, each writing its output + status to `agent_results` and an audit event.
 4. Health card renders from `agent_results`. Officer approves / rejects / requests documents.
 
 ## SLOs (targets)

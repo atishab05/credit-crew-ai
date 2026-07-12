@@ -19,6 +19,8 @@ The dispatcher in `src/lib/adapters/index.ts` chooses mock vs sandbox based on `
 | Account Aggregator | `IDBI_AA_BASE_URL` | `IDBI_AA_API_KEY` | `IDBI_AA_CONSENT_HANDLE` |
 | EPFO | `IDBI_EPFO_BASE_URL` | `IDBI_EPFO_API_KEY` | — |
 | Electricity | `IDBI_ELEC_BASE_URL` | `IDBI_ELEC_API_KEY` | — |
+| Fuel Costs | `IDBI_FUEL_BASE_URL` | `IDBI_FUEL_API_KEY` | — |
+| Digital Footprint | `IDBI_DFP_BASE_URL` | `IDBI_DFP_API_KEY` | — |
 | Mode switch | `DATA_SOURCE_MODE` | `mock` (default) or `sandbox` | — |
 | mTLS (optional) | — | `IDBI_MTLS_KEY` | `IDBI_MTLS_CERT`, `IDBI_MTLS_CA` |
 
@@ -32,13 +34,17 @@ Contracts live in `src/lib/adapters/types.ts`. Sandbox adapters currently expect
 // GST
 { annual_turnover: number; months: { month: number; value: number }[]; filings_on_time_pct: number }
 // UPI
-{ monthly_collections: { month: number; value: number }[]; collection_velocity_days: number }
+{ monthly_collections: { month: number; value: number }[]; collection_velocity_days: number; sale_txn_pct: number; purchase_txn_pct: number; total_transactions_12m: number; discipline_label: "disciplined" | "non_disciplined" | null }
 // AA
 { avg_balance: number; cash_conversion_days: number }
 // EPFO
 { employees: number; on_time_pf_pct: number }
 // Electricity
 { avg_monthly_kwh: number; on_time_bill_pct: number }
+// Fuel Costs
+{ avg_monthly_fuel_spend: number; fuel_cost_to_turnover_pct: number }
+// Digital Footprint
+{ digital_discipline_score: number; active_platform_count: number; active_months_last_12: number; last_activity_days_ago: number }
 ```
 
 ## Network path
