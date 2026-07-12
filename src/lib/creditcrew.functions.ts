@@ -99,6 +99,13 @@ export const connectSource = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const s = context.supabase as any;
+
+    await s
+      .from("data_connections")
+      .update({ status: "pending", connected_at: null, metadata: null })
+      .eq("application_id", data.application_id)
+      .eq("source", data.source);
+
     const { data: app } = await s.from("applications").select("pan,gstin").eq("id", data.application_id).maybeSingle();
     const ctx = { applicantId: data.application_id, pan: app?.pan ?? "", gstin: app?.gstin ?? "" };
 
