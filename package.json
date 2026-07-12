@@ -9,7 +9,9 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "node --import tsx/esm --test tests/adapters/gst.test.ts tests/adapters/upi.test.ts tests/adapters/aa.test.ts tests/adapters/epfo.test.ts tests/adapters/electricity.test.ts tests/adapters/fuel.test.ts tests/adapters/digital_footprint.test.ts tests/assessment/scoring.test.ts",
+    "test:watch": "node --import tsx/esm --test --watch tests/adapters/gst.test.ts tests/adapters/upi.test.ts tests/adapters/aa.test.ts tests/adapters/epfo.test.ts tests/adapters/electricity.test.ts tests/adapters/fuel.test.ts tests/adapters/digital_footprint.test.ts tests/assessment/scoring.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -82,6 +84,7 @@
     "globals": "^15.15.0",
     "nitro": "3.0.260603-beta",
     "prettier": "^3.7.3",
+    "tsx": "^4.23.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "8.1.3"
