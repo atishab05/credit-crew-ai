@@ -10,6 +10,25 @@ export type DataSourceSetting = {
   base_url: string | null;
 };
 
+function isMissingSettingsTable(error: { code?: string; message?: string; details?: string } | null): boolean {
+  if (!error) return false;
+  const text = `${error.message ?? ""} ${error.details ?? ""}`;
+  return (
+    text.includes("data_source_settings") &&
+    (text.includes("does not exist") || text.includes("schema cache") || text.includes("relation"))
+  );
+}
+
+function defaultSettings(): Record<AdapterSource, DataSourceSetting> {
+  return SOURCES.reduce(
+    (acc, source) => {
+      acc[source] = { source, mode: "mock", base_url: null };
+      return acc;
+    },
+    {} as Record<AdapterSource, DataSourceSetting>,
+  );
+}
+
 export const getDataSourceSettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -17,6 +36,7 @@ export const getDataSourceSettings = createServerFn({ method: "GET" })
       .from("data_source_settings")
       .select("source, mode, base_url");
 
+    if (isMissingSettingsTable(error)) return defaultSettings();
     if (error) throw new Error(error.message);
 
     const settings = (data ?? []).reduce((acc, row) => {
@@ -65,6 +85,8 @@ export const saveDataSourceSettings = createServerFn({ method: "POST" })
       .from("data_source_settings")
       .upsert(upserts, { onConflict: ["source"] });
 
+    if (isMissingSettingsTable(error))
+      throw new Error("The data_source_settings table has not been created yet. Run the latest Supabase migration to enable settings persistence.");
     if (error) throw new Error(error.message);
 
     const sourcesToReset = upserts.map((setting) => setting.source);

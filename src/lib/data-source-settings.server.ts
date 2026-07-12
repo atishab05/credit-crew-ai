@@ -7,6 +7,15 @@ export type DataSourceSetting = {
   base_url: string | null;
 };
 
+function isMissingSettingsTable(error: { code?: string; message?: string; details?: string } | null): boolean {
+  if (!error) return false;
+  const text = `${error.message ?? ""} ${error.details ?? ""}`;
+  return (
+    text.includes("data_source_settings") &&
+    (text.includes("does not exist") || text.includes("schema cache") || text.includes("relation"))
+  );
+}
+
 export async function getDataSourceSetting(source: AdapterSource): Promise<DataSourceSetting> {
   const { data, error } = await supabaseAdmin
     .from("data_source_settings")
@@ -14,6 +23,7 @@ export async function getDataSourceSetting(source: AdapterSource): Promise<DataS
     .eq("source", source)
     .maybeSingle();
 
+  if (isMissingSettingsTable(error)) return { source, mode: "mock", base_url: null };
   if (error) throw new Error(error.message);
 
   if (!data) {
@@ -32,6 +42,11 @@ export async function getAllDataSourceSettings(): Promise<Record<AdapterSource, 
     .from("data_source_settings")
     .select("source, mode, base_url");
 
+  if (isMissingSettingsTable(error)) {
+    return Object.fromEntries(
+      (["gst", "upi", "aa", "epfo", "electricity"] as const).map((s) => [s, { source: s, mode: "mock" as const, base_url: null }])
+    ) as Record<AdapterSource, DataSourceSetting>;
+  }
   if (error) throw new Error(error.message);
 
   const settings = (data ?? []).reduce((acc, row) => {
