@@ -47,7 +47,7 @@ function AppDetail() {
   });
 
   const runMut = useMutation({
-    mutationFn: () => { setTab("run"); return run({ data: { application_id: id } }); },
+    mutationFn: () => run({ data: { application_id: id } }),
     onSuccess: () => { toast.success("Assessment complete"); qc.invalidateQueries({ queryKey: ["application", id] }); qc.invalidateQueries({ queryKey: ["applications"] }); },
     onError: (e: any) => toast.error(e?.message ?? "Run failed"),
   });
@@ -60,6 +60,11 @@ function AppDetail() {
     onError: (e: any) => toast.error(e?.message ?? "Failed"),
   });
 
+  const handleRunAssessment = () => {
+    setTab("run");
+    runMut.mutate();
+  };
+
   if (q.isLoading || !data) return <div className="p-10 text-muted-foreground">Loading assessment…</div>;
 
   const conns = data.connections;
@@ -70,7 +75,7 @@ function AppDetail() {
   const recommendation = agents.find((a: any) => a.agent_name === "recommendation")?.output;
   const explanation = agents.find((a: any) => a.agent_name === "explainability")?.output;
 
-  const defaultTab = app.status === "analysis_complete" || app.decision ? "health" : connectedCount === 0 ? "sources" : running ? "run" : "run";
+  const defaultTab = app.status === "analysis_running" ? "run" : app.status === "analysis_complete" || app.decision ? "health" : "sources";
 
   return (
     <div className="p-6 lg:p-10 space-y-6 max-w-7xl">
@@ -134,7 +139,7 @@ function AppDetail() {
                 })}
               </div>
               <div className="mt-6 flex justify-end">
-                <Button disabled={connectedCount === 0 || runMut.isPending || running} onClick={() => runMut.mutate()}>
+                <Button disabled={connectedCount === 0 || runMut.isPending || running} onClick={handleRunAssessment}>
                   <Zap className="h-4 w-4 mr-2" /> Run multi-agent assessment
                 </Button>
               </div>
@@ -150,7 +155,7 @@ function AppDetail() {
                 <CardTitle>Agent collaboration</CardTitle>
                 <CardDescription>{running ? "Agents are analysing this MSME…" : recommendation ? "All agents completed." : "Trigger the run to see agents work."}</CardDescription>
               </div>
-              <Button disabled={connectedCount === 0 || runMut.isPending || running} onClick={() => runMut.mutate()}>
+              <Button disabled={connectedCount === 0 || runMut.isPending || running} onClick={handleRunAssessment}>
                 <Zap className="h-4 w-4 mr-2" /> {recommendation ? "Re-run" : "Run assessment"}
               </Button>
             </CardHeader>
