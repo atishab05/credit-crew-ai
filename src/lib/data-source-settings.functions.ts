@@ -69,7 +69,8 @@ export const saveDataSourceSettings = createServerFn({ method: "POST" })
     const changedSources = upserts
       .filter((setting) => {
         const existing = (existingSettings ?? []).find((row: any) => row.source === setting.source);
-        return existing ? existing.mode !== setting.mode : false;
+        if (!existing) return true;
+        return existing.mode !== setting.mode || (existing.base_url ?? null) !== (setting.base_url ?? null);
       })
       .map((setting) => setting.source);
 
