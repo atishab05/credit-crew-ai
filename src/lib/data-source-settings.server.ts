@@ -14,13 +14,18 @@ function defaultSetting(source: AdapterSource): DataSourceSetting {
 }
 
 function defaultSettings(): Record<AdapterSource, DataSourceSetting> {
-  return SOURCES.reduce((acc, source) => {
-    acc[source] = defaultSetting(source);
-    return acc;
-  }, {} as Record<AdapterSource, DataSourceSetting>);
+  return SOURCES.reduce(
+    (acc, source) => {
+      acc[source] = defaultSetting(source);
+      return acc;
+    },
+    {} as Record<AdapterSource, DataSourceSetting>,
+  );
 }
 
-function isMissingSettingsTable(error: { code?: string; message?: string; details?: string } | null): boolean {
+function isMissingSettingsTable(
+  error: { code?: string; message?: string; details?: string } | null,
+): boolean {
   if (!error) return false;
   const text = `${error.message ?? ""} ${error.details ?? ""}`;
   return (
@@ -51,7 +56,9 @@ export async function getDataSourceSetting(source: AdapterSource): Promise<DataS
   };
 }
 
-export async function getAllDataSourceSettings(): Promise<Record<AdapterSource, DataSourceSetting>> {
+export async function getAllDataSourceSettings(): Promise<
+  Record<AdapterSource, DataSourceSetting>
+> {
   const { data, error } = await supabaseAdmin
     .from("data_source_settings")
     .select("source, mode, base_url");
@@ -59,15 +66,18 @@ export async function getAllDataSourceSettings(): Promise<Record<AdapterSource, 
   if (isMissingSettingsTable(error)) return defaultSettings();
   if (error) throw new Error(error.message);
 
-  const settings = (data ?? []).reduce((acc, row) => {
-    const source = row.source as AdapterSource;
-    acc[source] = {
-      source,
-      mode: row.mode === "sandbox" ? "sandbox" : "mock",
-      base_url: row.base_url ?? null,
-    };
-    return acc;
-  }, {} as Record<AdapterSource, DataSourceSetting>);
+  const settings = (data ?? []).reduce(
+    (acc, row) => {
+      const source = row.source as AdapterSource;
+      acc[source] = {
+        source,
+        mode: row.mode === "sandbox" ? "sandbox" : "mock",
+        base_url: row.base_url ?? null,
+      };
+      return acc;
+    },
+    {} as Record<AdapterSource, DataSourceSetting>,
+  );
 
   for (const source of SOURCES) {
     if (!settings[source]) {
