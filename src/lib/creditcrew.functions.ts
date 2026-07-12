@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { fetchMetadata, healthCheck as adapterHealthCheck } from "@/lib/adapters";
+import { getAllDataSourceSettings } from "@/lib/data-source-settings.server";
 
 
 const PAN = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
