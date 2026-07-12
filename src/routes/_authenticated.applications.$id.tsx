@@ -65,6 +65,11 @@ function AppDetail() {
     runMut.mutate();
   };
 
+  const handleConnect = (source: DataSource, simulateFailure?: boolean) => {
+    setTab("sources");
+    connectMut.mutate({ source, simulateFailure });
+  };
+
   if (q.isLoading || !data) return <div className="p-10 text-muted-foreground">Loading assessment…</div>;
 
   const conns = data.connections;
@@ -127,10 +132,10 @@ function AppDetail() {
                         <SourceStatusIcon status={status} />
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" disabled={connectMut.isPending} onClick={() => connectMut.mutate({ source: src.key })}>
+                        <Button size="sm" variant="outline" disabled={connectMut.isPending} onClick={() => handleConnect(src.key)}>
                           {status === "connected" ? "Reconnect" : "Connect"}
                         </Button>
-                        <Button size="sm" variant="ghost" disabled={connectMut.isPending} onClick={() => connectMut.mutate({ source: src.key, simulateFailure: true })}>
+                        <Button size="sm" variant="ghost" disabled={connectMut.isPending} onClick={() => handleConnect(src.key, true)}>
                           Simulate failure
                         </Button>
                       </div>
@@ -177,6 +182,7 @@ function AppDetail() {
                 })}
               </div>
               <AgentTimeline agents={agents} running={running} />
+              <AgentDataFlow agents={agents} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -417,4 +423,66 @@ function formatValue(v: any): string {
   if (Array.isArray(v)) return v.length ? v.map(formatValue).join(", ") : "—";
   if (v && typeof v === "object") return JSON.stringify(v);
   return String(v);
+}
+
+function AgentDataFlow({ agents }: { agents: any[] }) {
+  const dataFlowMap: Record<string, string[]> = {
+    financial_data: [],
+    revenue_intelligence: ["financial_data"],
+    cash_flow: ["financial_data", "revenue_intelligence"],
+    compliance: ["financial_data"],
+    payment_behaviour: ["financial_data", "cash_flow"],
+    risk: ["financial_data", "revenue_intelligence", "cash_flow", "compliance", "payment_behaviour"],
+    recommendation: ["risk", "revenue_intelligence", "cash_flow"],
+    explainability: ["recommendation", "risk", "compliance", "payment_behaviour"],
+  };
+
+  const getAgentInfo = (key: string) => AGENTS.find((a) => a.key === key);
+  const getAgentStatus = (key: string) => agents.find((a) => a.agent_name === key)?.status ?? "pending";
+
+  return (
+    <div className="mt-6">
+      <div className="text-xs uppercase tracking-wide text-muted-foreground mb-4">Inter-agent data flow</div>
+      <div className="grid gap-4">
+        {AGENTS.map((agent) => {
+          const dependencies = dataFlowMap[agent.key] || [];
+          const status = getAgentStatus(agent.key);
+          
+          if (dependencies.length === 0) {
+            return (
+              <div key={agent.key} className="rounded-lg border p-3 bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <div className="text-xs font-medium">{agent.label}</div>
+                  <Badge variant="outline" className="capitalize text-[10px]">{status}</Badge>
+                </div>
+              </div>
+            );
+          }
+
+          const depAgents = dependencies.map((depKey) => {
+            const depAgent = getAgentInfo(depKey);
+            const depStatus = getAgentStatus(depKey);
+            return { key: depKey, label: depAgent?.label || depKey, status: depStatus };
+          });
+
+          return (
+            <div key={agent.key} className="rounded-lg border p-3 space-y-2 bg-muted/30">
+              <div className="flex items-center gap-2">
+                <div className="text-xs font-medium">{agent.label}</div>
+                <Badge variant="outline" className="capitalize text-[10px]">{status}</Badge>
+              </div>
+              <div className="text-xs text-muted-foreground">Receives data from:</div>
+              <div className="flex flex-wrap gap-1">
+                {depAgents.map((dep) => (
+                  <span key={dep.key} className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-mono ${dep.status === "completed" ? "bg-success/10 text-success" : dep.status === "running" ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground"}`}>
+                    {dep.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
