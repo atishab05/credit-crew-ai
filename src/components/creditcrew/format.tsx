@@ -22,10 +22,10 @@ export function statusBadge(status: string) {
 
 export function riskBadge(rating: string) {
   const map: Record<string, string> = {
-    Low: "bg-success/15 text-success border-success/30",
-    Moderate: "bg-accent/15 text-accent border-accent/30",
-    Elevated: "bg-warning/20 text-warning-foreground border-warning/40",
-    High: "bg-destructive/15 text-destructive border-destructive/30",
+    Low: "bg-emerald-50 text-emerald-700 border-emerald-300",
+    Moderate: "bg-blue-50 text-blue-700 border-blue-300",
+    Elevated: "bg-amber-50 text-amber-700 border-amber-300",
+    High: "bg-red-50 text-red-700 border-red-300",
   };
   return <Badge variant="outline" className={map[rating] ?? ""}>{rating} risk</Badge>;
 }
