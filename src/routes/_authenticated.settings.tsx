@@ -64,7 +64,7 @@ function SettingsPage() {
     setStatusMessage(null);
     setSaving(true);
     try {
-      await saveSettings({ settings });
+      await saveSettings({ data: { settings } });
       setStatusMessage("Settings saved successfully.");
     } catch (err: any) {
       setStatusMessage(err?.message ?? "Unable to save settings.");
