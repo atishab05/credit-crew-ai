@@ -83,7 +83,7 @@ export const saveDataSourceSettings = createServerFn({ method: "POST" })
 
     const { error } = await context.supabase
       .from("data_source_settings")
-      .upsert(upserts, { onConflict: ["source"] });
+      .upsert(upserts, { onConflict: "source" });
 
     if (isMissingSettingsTable(error))
       throw new Error("The data_source_settings table has not been created yet. Run the latest Supabase migration to enable settings persistence.");
