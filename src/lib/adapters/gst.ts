@@ -1,4 +1,4 @@
-import type { AdapterContext, GstMetadata, HealthCheckResult } from "./types";
+import type { AdapterContext, AdapterSandboxConfig, GstMetadata, HealthCheckResult } from "./types";
 import { seededRand } from "./util";
 
 // MOCK: identical output shape and values to the original inline generator.

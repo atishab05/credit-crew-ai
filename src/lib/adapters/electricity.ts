@@ -1,4 +1,4 @@
-import type { AdapterContext, ElectricityMetadata, HealthCheckResult } from "./types";
+import type { AdapterContext, AdapterSandboxConfig, ElectricityMetadata, HealthCheckResult } from "./types";
 import { seededRand } from "./util";
 
 // Electricity is a bonus alternative data source described in the PRD /
