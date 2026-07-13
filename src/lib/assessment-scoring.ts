@@ -14,8 +14,8 @@ import type {
   ElectricityMetadata,
   FuelMetadata,
   DigitalFootprintMetadata,
-} from "../adapters/types.js";
-import { seededRand } from "./adapters/util.js";
+} from "../adapters/types";
+import { seededRand } from "./adapters/util";
 
 export type ConnectedSources = {
   gst?: GstMetadata | null;
