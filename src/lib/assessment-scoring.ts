@@ -14,7 +14,7 @@ import type {
   ElectricityMetadata,
   FuelMetadata,
   DigitalFootprintMetadata,
-} from "../adapters/types";
+} from "./adapters/types";
 import { seededRand } from "./adapters/util";
 
 export type ConnectedSources = {
