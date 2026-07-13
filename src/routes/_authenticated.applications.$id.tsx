@@ -128,11 +128,11 @@ function AppDetail() {
             <CardHeader>
               <CardTitle>Connect data sources</CardTitle>
               <CardDescription>
-                Connection status is based on the current saved mode per source. {connectedCount}/4 connected.
+                Connection status is based on the current saved mode per source. {connectedCount}/7 connected.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Progress value={(connectedCount / 4) * 100} className="mb-6 h-2" />
+              <Progress value={(connectedCount / 7) * 100} className="mb-6 h-2" />
               <div className="grid gap-4 md:grid-cols-2">
                 {DATA_SOURCES.map((src) => {
                   const c = conns.find((x: any) => x.source === src.key);
