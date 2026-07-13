@@ -1,4 +1,4 @@
-import type { AdapterContext, HealthCheckResult, UpiMetadata } from "./types";
+import type { AdapterContext, AdapterSandboxConfig, HealthCheckResult, UpiMetadata } from "./types";
 import { seededRand } from "./util";
 
 export function fetchMock(ctx: AdapterContext): UpiMetadata {

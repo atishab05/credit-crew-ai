@@ -1,4 +1,4 @@
-import type { AdapterContext, EpfoMetadata, HealthCheckResult } from "./types";
+import type { AdapterContext, AdapterSandboxConfig, EpfoMetadata, HealthCheckResult } from "./types";
 import { seededRand } from "./util";
 
 export function fetchMock(ctx: AdapterContext): EpfoMetadata {

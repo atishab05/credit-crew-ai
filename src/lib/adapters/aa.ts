@@ -1,4 +1,4 @@
-import type { AaMetadata, AdapterContext, HealthCheckResult } from "./types";
+import type { AaMetadata, AdapterContext, AdapterSandboxConfig, HealthCheckResult } from "./types";
 import { seededRand } from "./util";
 
 export function fetchMock(ctx: AdapterContext): AaMetadata {
