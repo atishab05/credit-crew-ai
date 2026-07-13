@@ -197,6 +197,30 @@ export type Database = {
           },
         ]
       }
+      data_source_settings: {
+        Row: {
+          base_url: string | null
+          created_at: string
+          mode: string
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          base_url?: string | null
+          created_at?: string
+          mode?: string
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          base_url?: string | null
+          created_at?: string
+          mode?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           application_id: string
